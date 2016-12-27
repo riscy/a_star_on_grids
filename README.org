@@ -55,24 +55,24 @@
   On a 4-connected grid, the distance between two cells assuming no obstacles is
   the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
   #+begin_src c++
-  h(i,j) = C(Δx + Δy)
+  h(i,j) = C * (Δx + Δy)
   #+end_src
   where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
   ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move.
 
   When pathfinding on an 8-connected grid, use the *octile heuristic*:
   #+begin_src c++
-  h(i, j) = C Δx + B Δy   if Δx > Δy
-            C Δy + B Δx   else
+  h(i, j) = C * Δx + B * Δy   if Δx > Δy
+            C * Δy + B * Δx   else
   #+end_src 
   where ~B = D - C~ with ~D~ being the cost to take a diagonal move.
 
   Note the octile heuristic can be written without a conditional (albeit with an
   absolute value), which may help improve instruction level parallelism:
   #+begin_src c++
-  h(i, j) = (E abs(Δx - Δy) + D (Δx + Δy)) / 2
+  h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
   #+end_src
-  where ~E = 2C - D~.  You can see how to simplify this further if ~2~ divides
+  where ~E = 2 * C - D~.  You can see how to simplify this further if ~2~ divides
   ~D~ and ~E~.
   # The proof for (1) relies on using a 45-degree rotation matrix to
   # turn what is effectively a norm in Linfty into a norm in L1 space.
