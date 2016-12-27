@@ -26,23 +26,24 @@
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
   iteration expands the open list by adding the neighbors of an already open
-  state.  The open state that gets chosen is the one with the lowest $f$ cost,
-  $$f_i(s,g) = g(s,i) + h(i,g)$$
+  state.  The open state that gets chosen is the one with the lowest ~f~ cost,
+  #+begin_src c++
+  f_i(s,g) = g(s,i) + h(i,g)
+  #+end_src
 
-  This $f$ cost is an estimate of the cost of an optimal path between $s$ and
-  $g$ that goes through $i$.  Here $g(s,i)$ is the /ground truth/ distance to
-  get from the start state $s$ to open state $i$ (the value of which A*
-  knows exactly).  $h(i,g)$ is a cheaply computed heuristic estimate for the
-  distance from $i$ to the goal state $g$.
+  This ~f~ cost is an estimate of the cost of an optimal path between ~s~ and
+  ~g~ that goes through ~i~.  Here ~g(s,i)~ is the /ground truth/ distance to
+  get from the start state ~s~ to open state ~i~ (the value of which A*
+  knows exactly).  ~h(i,g)~ is a cheaply computed heuristic estimate for the
+  distance from ~i~ to the goal state ~g~.
 * Implement the open list using a heap
   ...and [[https://en.wikipedia.org/wiki/Heap_(data_structure)][implement the heap using an array]].
 
-  Note it is common for multiple states on the open list have the lowest $f$
+  Note it is common for multiple states on the open list have the lowest ~f~
   cost, so there is an opportunity to add smart tie-breaking to the heap
   evaluation function.  This makes A* focus on deep solutions rather than a
   breadth of shallow solutions.  A video example of this can be viewed on [[http://movingai.com/astar.html][Nathan
   Sturtevant's movingai.com]].
-
 * Avoid floating point arithmetic
   Prefer integral data types wherever possible.  This is not only faster but
   helps to avoid the numerical imprecision that can confuse debugging attempts.
@@ -52,20 +53,27 @@
   heuristic is the distance between two cells assuming no obstacles.
 
   On a 4-connected grid, the distance between two cells assuming no obstacles is
-  the *rectilinear* (or *L1-norm* or *Manhattan*) distance: $$h(i,j) = C(Δx +
-  Δy)$$ where $Δx$ and $Δy$ are absolute distances between grid cells along the
-  $x$ and $y$ axes and $C$ is the cost to take a cardinal move.
+  the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
+  #+begin_src c++
+  h(i,j) = C(Δx + Δy)
+  #+end_src
+  where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
+  ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move.
 
   When pathfinding on an 8-connected grid, use the *octile heuristic*:
-  $$h(i, j) = \begin{cases}C Δx + B Δy & \text{if $Δx > Δy$} \\
-                           C Δy + B Δx & \text{else}
-              \end{cases}$$
-  where $B = D - C$ with $D$ being the cost to take a diagonal move.
+  #+begin_src c++
+  h(i, j) = C Δx + B Δy   if Δx > Δy
+            C Δy + B Δx   else
+  #+end_src 
+  where ~B = D - C~ with ~D~ being the cost to take a diagonal move.
 
   Note the octile heuristic can be written without a conditional (albeit with an
-  absolute value), which may help improve instruction level parallelism: $$h(i,
-  j) = \frac{E \left|Δx - Δy\right| + D (Δx + Δy)}{2}$$ where $E = 2C - D$.  You
-  can see how to simplify this further if $2$ divides $D$ and $E$.
+  absolute value), which may help improve instruction level parallelism:
+  #+begin_src c++
+  h(i, j) = (E abs(Δx - Δy) + D (Δx + Δy)) / 2
+  #+end_src
+  where ~E = 2C - D~.  You can see how to simplify this further if ~2~ divides
+  ~D~ and ~E~.
   # The proof for (1) relies on using a 45-degree rotation matrix to
   # turn what is effectively a norm in Linfty into a norm in L1 space.
   # so something like
@@ -79,14 +87,14 @@
   extremes.  Here are some ideas for setting diagonal/cardinal costs.
 
 *** Diagonal: 99/Cardinal: 70
-    If you prefer a diagonal move to cost $\sqrt{2}$ relative to a
-    cardinal move, try using $99$ for the cost of a diagonal move and $70$ for
+    If you prefer a diagonal move to cost ~sqrt(2)~ relative to a
+    cardinal move, try using ~99~ for the cost of a diagonal move and ~70~ for
     the cost of a cardinal move.  This close approximation helps to avoid
     floating point arithmetic.
 *** Diagonal: 3/Cardinal: 2
     If your heuristic can return fractional values, this gives you the ability
     to take the /ceiling/ of those fractional heuristics since all distances
-    must be integral.  This is still reasonably close to $\sqrt{2}$, and again
+    must be integral.  This is still reasonably close to ~sqrt(2)~, and again
     you avoiding floating point arithmetic.
 
     (My Ph.D. co-supervisor Nathan Sturtevant showed me this when we wrote
@@ -97,8 +105,7 @@
     this keeps the size of the open list smaller, but it also increases node
     expansions.  This can be beneficial but depends on the layout of the grid.
 * Resources
-  A short list of resources that might also be helpful.
-
+  A short list of resources that might also be helpful:
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: This is a good starting point for learning
        A*.
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia has a good description of A*.
