@@ -21,7 +21,7 @@
   for ideas on how to make an existing implementation a bit faster.
 * Preliminaries
   Skip this if you're familiar with A*.  If you're not, you might want to check
-  out the [[Resources][resources]] section at the bottom of this document.
+  out the [[#resources][resources]] section at the bottom of this document.
 
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
