@@ -19,6 +19,9 @@
   Here are some simple notes on ways to improve A*, focusing on four- and
   eight-connected gridworlds.  This is pitched at hobbyists or anyone looking
   for ideas on how to make an existing implementation a bit faster.
+*** Contributing
+    If you have any (much appreciated) corrections or contributions, feel free
+    to get in touch or to simply make a pull request.
 * Preliminaries
   Skip this if you're very familiar with A*.  If you're not, you might want to check
   out the [[#resources][resources]] section.
@@ -77,21 +80,21 @@
   # A proof for this relies on using a 45-degree rotation matrix to
   # turn what is effectively a norm in Linfty into a norm in L1 space.
 * Modified move costs
-  On an 8-connected grid, the cost of a diagonal move relative to a cardinal
-  move affects the appearance of the resulting paths.  If a diagonal move costs
+  On an 8-connected grid, the cost of a diagonal move (~D~) relative to the cost of a cardinal
+  move (~C~) affects the appearance of the resulting paths.  If a diagonal move costs
   /less/ than a cardinal move, A* prefers zig-zagging paths.  If a diagonal move
   costs more than /two/ cardinal moves, A* prefers rectilinear paths.
 
-  Paths tend to look best when the diagonal move cost lies between these two
-  extremes.  Here are some ideas for setting diagonal/cardinal costs.
+  Paths tend to look best when the costs lie between these two
+  extremes -- you might try one of the following.
 
 *** Diagonal: 99/Cardinal: 70
     If you prefer a diagonal move to cost ~sqrt(2)~ relative to a
-    cardinal move, try using ~99~ for the cost of a diagonal move and ~70~ for
+    cardinal move, try using ~D = 99~ for the cost of a diagonal move and ~C = 70~ for
     the cost of a cardinal move.  This close approximation helps to avoid
     floating point arithmetic.
 *** Diagonal: 3/Cardinal: 2
-    If your heuristic can return fractional values, this gives you the ability
+    If your heuristic can return fractional values, ~D = 3/C = 2~ gives you the ability
     to take the /ceiling/ of those fractional heuristics since all distances
     must be integral.  This is still reasonably close to ~sqrt(2)~, and again
     you avoid floating point arithmetic.
@@ -100,7 +103,7 @@
     paper on [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic Optimization]], and it made a noticeable
     difference.)
 *** Diagonal: 99/Cardinal: 50
-    This gives something very close to a rectilinear cost structure.  On average
+    ~D = 99/C = 50~ gives something very close to a rectilinear cost structure.  On average
     this keeps the size of the open list smaller, but it also increases node
     expansions.  This can be beneficial but depends on the layout of the grid.
 * Resources
