@@ -20,14 +20,14 @@
   eight-connected gridworlds.  This is pitched at hobbyists or anyone looking
   for ideas on how to make an existing implementation a bit faster.
 * Preliminaries
-  Skip this if you're familiar with A*.  If you're not, you might want to check
-  out the [[#resources][resources]] section at the bottom of this document.
+  Skip this if you're very familiar with A*.  If you're not, you might want to check
+  out the [[#resources][resources]] section.
 
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
-  iteration expands the open list by adding the neighbors of an already open
+  iteration expands the open list with the neighbors of an already open
   state.  The open state that gets chosen is the one with the lowest ~f~ cost,
-  #+begin_src c++
+  #+begin_src ruby
   f_i(s,g) = g(s,i) + h(i,g)
   #+end_src
 
@@ -54,14 +54,14 @@
 
   On a 4-connected grid, the distance between two cells assuming no obstacles is
   the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
-  #+begin_src c++
+  #+begin_src ruby
   h(i,j) = C * (Δx + Δy)
   #+end_src
   where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
   ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move.
 
   When pathfinding on an 8-connected grid, use the *octile heuristic*:
-  #+begin_src c++
+  #+begin_src ruby
   h(i, j) = C * Δx + B * Δy   if Δx > Δy
             C * Δy + B * Δx   else
   #+end_src 
@@ -69,14 +69,13 @@
 
   Note the octile heuristic can be written without a conditional (albeit with an
   absolute value), which may help improve instruction level parallelism:
-  #+begin_src c++
+  #+begin_src ruby
   h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
   #+end_src
   where ~E = 2 * C - D~.  You can see how to simplify this further if ~2~ divides
   ~D~ and ~E~.
-  # The proof for (1) relies on using a 45-degree rotation matrix to
+  # A proof for this relies on using a 45-degree rotation matrix to
   # turn what is effectively a norm in Linfty into a norm in L1 space.
-  # so something like
 * Modified move costs
   On an 8-connected grid, the cost of a diagonal move relative to a cardinal
   move affects the appearance of the resulting paths.  If a diagonal move costs
@@ -95,20 +94,20 @@
     If your heuristic can return fractional values, this gives you the ability
     to take the /ceiling/ of those fractional heuristics since all distances
     must be integral.  This is still reasonably close to ~sqrt(2)~, and again
-    you avoiding floating point arithmetic.
+    you avoid floating point arithmetic.
 
-    (My Ph.D. co-supervisor Nathan Sturtevant showed me this when we wrote
-    /Euclidean Heuristic Optimization/ (AAAI 2011), and it made a noticeable
+    (My Ph.D. co-supervisor Nathan Sturtevant showed me this when we wrote our
+    paper on [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic Optimization]], and it made a noticeable
     difference.)
 *** Diagonal: 99/Cardinal: 50
     This gives something very close to a rectilinear cost structure.  On average
     this keeps the size of the open list smaller, but it also increases node
     expansions.  This can be beneficial but depends on the layout of the grid.
 * Resources
-  A short list of resources that might also be helpful:
+  Additional resources that might also be helpful:
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: This is a good starting point for learning
        A*.
-  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia has a good description of A*.
+  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems and videos covering
        some advanced topics.
   - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra maps]] :: Dijkstra maps are also known as "differential heuristics".
