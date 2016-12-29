@@ -29,7 +29,7 @@
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
   iteration expands the open list with the neighbors of an already open
-  state.  The open state that gets chosen is the one with the lowest ~f~ cost,
+  state.  The open state ~i~ that gets chosen is one with the lowest ~f~ cost,
   #+begin_src ruby
   f_i(s,g) = g(s,i) + h(i,g)
   #+end_src
@@ -41,6 +41,10 @@
   distance from ~i~ to the goal state ~g~.
 * Implement the open list using a heap
   ...and [[https://en.wikipedia.org/wiki/Heap_(data_structure)][implement the heap using an array]].
+
+  Depending on the implementation language, this isn't as important for small
+  maps (on the order of a couple thousand cells).  On larger maps, this can cut
+  execution time in half.
 
   Note it is common for multiple states on the open list have the lowest ~f~
   cost, so there is an opportunity to add smart tie-breaking to the heap
@@ -85,8 +89,9 @@
   /less/ than a cardinal move, A* prefers zig-zagging paths.  If a diagonal move
   costs more than /two/ cardinal moves, A* prefers rectilinear paths.
 
-  Paths tend to look best when the costs lie between these two
-  extremes -- you might try one of the following.
+  Paths tend to look best when the costs lie between these two extremes, but
+  some algorithms (like Fringe Search) are hugely sensitive to changes in cost
+  structure.  You might try one of the following.
 
 *** Diagonal: 99/Cardinal: 70
     If you prefer a diagonal move to cost ~sqrt(2)~ relative to a

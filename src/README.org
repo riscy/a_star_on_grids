@@ -1,0 +1,52 @@
+#+TITLE: Best practices for A* on grids (source code)
+
+* Table of Contents :TOC_1_gh:noexport:
+ - [[#description][Description]]
+ - [[#usage][Usage]]
+
+* Description
+  Some simple pathfinding code, featuring the A*, LRTA*, and Fringe Search
+  algorithms.  Feel free to use this source code as an example to build your own
+  implementation off of.
+* Usage
+  If you have `g++` installed, you should be able to compile and run a demo
+  with:
+  #+begin_src bash
+  make
+  #+end_src
+  
+  You should see some output resembling the following:
+
+  #+begin_src bash
+  LRTA* (suboptimal):
+  Total problems: 100000
+  Mean nodes expanded: 279
+  Mean path length: 279
+  Mean path cost: 409.742
+  Mean open list size: 0
+  Total time (sec): 1.62758
+
+  Basic A*:
+  Total problems: 100000
+  Mean nodes expanded: 192
+  Mean path length: 33
+  Mean path cost: 73.2619
+  Mean open list size: 45
+  Total time (sec): 3.14056
+
+  Fringe search:
+  Total problems: 100000
+  Mean nodes expanded: 193
+  Mean path length: 33
+  Mean path cost: 73.2619
+  Mean open list size: 0
+  Total time (sec): 4.68347
+
+  A* with a heap and tiebreaking on larger g:
+  Total problems: 100000
+  Mean nodes expanded: 187
+  Mean path length: 33
+  Mean path cost: 73.2619
+  Mean open list size: 46
+  Total time (sec): 3.25745
+  #+end_src
