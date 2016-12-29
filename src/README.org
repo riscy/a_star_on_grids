@@ -5,11 +5,11 @@
  - [[#usage][Usage]]
 
 * Description
-  Some simple pathfinding code, featuring the A*, LRTA*, and Fringe Search
+  Some simple pathfinding code, featuring the popular A*, LRTA*, and Fringe Search
   algorithms.  Feel free to use this source code as an example to build your own
   implementation off of.
 * Usage
-  If you have `g++` installed, you should be able to compile and run a demo
+  If you have ~g++~ installed, you should be able to compile and run a demo
   with:
   #+begin_src bash
   make
@@ -17,7 +17,7 @@
   
   You should see some output resembling the following:
 
-  #+begin_src bash
+  #+begin_src
   LRTA* (suboptimal):
   Total problems: 100000
   Mean nodes expanded: 279
