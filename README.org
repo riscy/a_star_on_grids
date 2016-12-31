@@ -1,18 +1,24 @@
 #+TITLE: Best practices for A* on grids
-#+OPTIONS: toc:1 author:t creator:nil num:nil
+#+OPTIONS: toc:3 author:t creator:nil num:nil
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
 
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
 
-* Table of Contents :TOC_1_gh:noexport:
+* Table of Contents :TOC_3_gh:noexport:
  - [[#description][Description]]
+     - [[#contributing][Contributing]]
  - [[#preliminaries][Preliminaries]]
  - [[#implement-the-open-list-using-a-heap][Implement the open list using a heap]]
  - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
  - [[#use-an-underestimating-heuristic][Use an underestimating heuristic]]
+     - [[#on-a-4-connected-grid][On a 4-connected grid]]
+     - [[#on-an-8-connected-grid][On an 8-connected grid]]
  - [[#modified-move-costs][Modified move costs]]
+     - [[#diagonal-99cardinal-70][Diagonal: 99/Cardinal: 70]]
+     - [[#diagonal-3cardinal-2][Diagonal: 3/Cardinal: 2]]
+     - [[#diagonal-99cardinal-50][Diagonal: 99/Cardinal: 50]]
  - [[#resources][Resources]]
 
 * Description
@@ -61,31 +67,32 @@
   path when it's using an admissible heuristic.  A good, admissible gridworld
   heuristic is the distance between two cells assuming no obstacles.
 
-  On a 4-connected grid, the distance between two cells assuming no obstacles is
-  the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
-  #+begin_src ruby
-  h(i,j) = C * (Δx + Δy)
-  #+end_src
-  where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
-  ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move.
-
-  When pathfinding on an 8-connected grid, use the *octile heuristic*:
-  #+begin_src ruby
-  h(i, j) = C * Δx + B * Δy   if Δx > Δy
-            C * Δy + B * Δx   else
-  #+end_src 
-  where ~B = D - C~ with ~D~ being the cost to take a diagonal move.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][Example
-  code]].
-
-  Note the octile heuristic can be written without a conditional (albeit with an
-  absolute value), which may help improve instruction level parallelism:
-  #+begin_src ruby
-  h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
-  #+end_src
-  where ~E = 2 * C - D~.  You can see how to simplify this further if ~2~ divides
-  ~D~ and ~E~.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][Example code]].
-  # A proof for this relies on using a 45-degree rotation matrix to
-  # turn what is effectively a norm in Linfty into a norm in L1 space.
+*** On a 4-connected grid
+    The distance between two cells on a 4-connected grid, assuming no obstacles,
+    is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
+    #+begin_src ruby
+    h(i,j) = C * (Δx + Δy)
+    #+end_src
+    where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
+    ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move.
+*** On an 8-connected grid
+    When pathfinding on an 8-connected grid, use the *octile heuristic*:
+    #+begin_src ruby
+    h(i, j) = C * Δx + B * Δy   if Δx > Δy
+              C * Δy + B * Δx   else
+    #+end_src 
+    where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
+    being the cost to take a diagonal move.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][Example code]].
+  
+    Note the octile heuristic can be written without a conditional (albeit with an
+    absolute value), which may help improve instruction level parallelism:
+    #+begin_src ruby
+    h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
+    #+end_src
+    where ~E = 2 * C - D~.  You can see how to simplify this further if both ~D~
+    and ~E~ are even numbers.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][Example code]].
+    # A proof for this relies on using a 45-degree rotation matrix to
+    # turn what is effectively a norm in Linfty into a norm in L1 space.
 * Modified move costs
   On an 8-connected grid, the cost of a diagonal move (~D~) relative to the cost of a cardinal
   move (~C~) affects the appearance of the resulting paths.  If a diagonal move costs
