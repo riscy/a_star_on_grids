@@ -83,4 +83,8 @@ void benchmark_grid_costs() {
   cout << endl << "Diagonal: 99/Cardinal: 50" << endl;
   grid_costs(50, 99); // set the cardinal/diagonal movement costs
   benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
+
+  cout << endl << "Diagonal: 1/Cardinal: 1" << endl;
+  grid_costs(1, 1); // set the cardinal/diagonal movement costs
+  benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
 }
