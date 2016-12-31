@@ -133,7 +133,7 @@ void astar_heap(Graph & graph, Node* ss, Node* gg, Stats & stats,
         continue;
 
       // NOTE: you can implement greedy best-first search by setting g = 0 here,
-      // or weighted A* by scaling g up by some scalar > 1.
+      // or weighted A* by scaling h up by some scalar > 1.
       const int g = expand_me->g + cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
         add_me->whence = expand_me;
@@ -240,6 +240,7 @@ void fringe_search(Graph & graph, Node* ss, Node* gg, Stats & stats,
   } while (!found && !Fringe.empty());
 
   // Stats collection & cleanup
+  stats.open_list_size += Fringe.size();
   reconstruct_path(ss, gg, cost, stats);
   for (iter ff = Fringe.begin(); ff != Fringe.end(); ++ ff)
     (*ff)->open = false;

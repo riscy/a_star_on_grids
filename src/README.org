@@ -39,7 +39,7 @@
   Mean nodes expanded: 193
   Mean path length: 33
   Mean path cost: 73.2619
-  Mean open list size: 0
+  Mean open list size: 46
   Total time (sec): 4.68347
 
   A* with a heap and tiebreaking on larger g:
