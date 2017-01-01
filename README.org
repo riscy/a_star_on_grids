@@ -101,7 +101,6 @@
   Paths tend to look best when the costs lie between these two extremes, but
   some algorithms (like Fringe Search) are hugely sensitive to changes in cost
   structure.  You might try one of the following.
-
 *** Diagonal: 99/Cardinal: 70
     If you prefer a diagonal move to cost ~sqrt(2)~ relative to a
     cardinal move, try using ~D = 99~ for the cost of a diagonal move and ~C = 70~ for
@@ -113,13 +112,14 @@
     distances must be integral.  This is still reasonably close to a ~D/C~ ratio
     of ~sqrt(2)~, and again you avoid floating point arithmetic.
 
-    (My Ph.D. co-supervisor Nathan Sturtevant showed me this when we wrote our
-    paper on [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and
-    it made a noticeable difference.)
+    My Ph.D. co-supervisor Nathan Sturtevant showed me this when we wrote
+    [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made
+    a noticeable difference.
 *** Diagonal: 99/Cardinal: 50
-    ~D = 99/C = 50~ gives something very close to a rectilinear cost structure.  On average
-    this keeps the size of the open list smaller, but it also increases node
-    expansions.  This can be beneficial but depends on the layout of the grid.
+    ~D = 99/C = 50~ gives something very close to a rectilinear cost structure.
+    On average this can keep the size of the open list smaller, but it can also
+    increase node expansions, depending on the layout of the grid.  This can be
+    beneficial in many cases, but you should test it out before you use it.
 * Resources
   Additional resources that might also be helpful:
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: This is a good starting point for learning
