@@ -12,7 +12,7 @@
  - [[#preliminaries][Preliminaries]]
  - [[#implement-the-open-list-using-a-heap][Implement the open list using a heap]]
  - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
- - [[#use-an-underestimating-heuristic][Use an underestimating heuristic]]
+ - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
      - [[#on-a-4-connected-grid][On a 4-connected grid]]
      - [[#on-an-8-connected-grid][On an 8-connected grid]]
  - [[#modified-move-costs][Modified move costs]]
@@ -62,11 +62,10 @@
 * Avoid floating point arithmetic
   Prefer integral data types wherever possible.  This is not only faster but
   helps to avoid the numerical imprecision that can confuse debugging attempts.
-* Use an underestimating heuristic
-  Heuristics that underestimate are called /admissible/.  A* recovers an optimal
+* Use a non-overestimating heuristic
+  Heuristics that don't overestimate are called /admissible/.  A* recovers an optimal
   path when it's using an admissible heuristic.  A good, admissible gridworld
   heuristic is the distance between two cells assuming no obstacles.
-
 *** On a 4-connected grid
     The distance between two cells on a 4-connected grid, assuming no obstacles,
     is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
