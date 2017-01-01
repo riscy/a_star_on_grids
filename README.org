@@ -23,8 +23,8 @@
 
 * Description
   Here are some simple notes on ways to improve A*, focusing on four- and
-  eight-connected gridworlds.  This is pitched at hobbyists or anyone looking
-  for ideas on how to make an existing implementation a bit faster.
+  eight-connected gridworlds.  This document is pitched at hobbyists and anyone
+  looking for ideas on how to make an existing implementation a bit faster.
 
   Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][src]] directory for some example code in C++.
 *** Contributing
@@ -36,7 +36,7 @@
 
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
-  iteration expands the open list with the neighbors of an already open
+  iteration expands the /open list/ with the neighbors of an already open
   state.  The open state ~i~ that gets chosen is one with the lowest ~f~ cost,
   #+begin_src ruby
   f_i(s,g) = g(s,i) + h(i,g)
