@@ -127,8 +127,8 @@
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems and videos covering
        some advanced topics.
-  - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra maps]] :: Dijkstra maps are also known as "differential heuristics".
-       I looked at some ways to set up differential heuristics in a paper called
-       [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of search Heuristics]] (Rayner, Sturtevant, Bowling) but
-       this article describes some extremely novel ways to use these mappings to
-       control game entities.
+  - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra Maps]] :: Dijkstra Maps are also known as "differential heuristics",
+       "ALT heuristics", or "Lipschitz embeddings".  We looked at smart ways to
+       set these heuristics up in [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of Search Heuristics]] (Rayner,
+       Sturtevant, Bowling) but this article describes some extremely novel ways
+       to use these mappings to control game entities.
