@@ -55,9 +55,9 @@
   execution time in half.
 
   Note it is common for multiple states on the open list have the lowest ~f~
-  cost, so there is an opportunity to add smart tie-breaking to the heap
-  evaluation function.  This makes A* focus on deep solutions rather than a
-  breadth of shallow solutions.  A video example of this can be viewed on [[http://movingai.com/astar.html][Nathan
+  cost, so there is an opportunity to add [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][smart tie-breaking]] on larger ~g~
+  values.  This makes A* focus on deep solutions rather than a breadth of
+  shallow solutions.  A video example of this can be viewed on [[http://movingai.com/astar.html][Nathan
   Sturtevant's movingai.com]].
 * Avoid floating point arithmetic
   Prefer integral data types wherever possible.  This is not only faster but
