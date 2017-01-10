@@ -1,0 +1,11 @@
+#+TITLE: Best practices for A* on grids (maps)
+
+* Description
+
+  These maps assume the same file format as [[http://web.cs.du.edu/~sturtevant/papers/benchmarks.pdf][Nathan Sturtevant's Benchmarks for
+  Grid-Based Pathfinding (2012)]].  The maps are human readable and the syntax for
+  defining them is self explanatory (see [[./example.map][example.map]]), but a description of the
+  map format is available [[http://www.movingai.com/benchmarks/formats.html][here]].
+
+  Many more benchmark maps from a variety of commercial video games are
+  available from movingai.com [[http://www.movingai.com/benchmarks/index.html][here]].
