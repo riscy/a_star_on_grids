@@ -2,6 +2,9 @@
 #+OPTIONS: toc:nil author:t creator:nil num:nil
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
+#+LATEX_HEADER: \usepackage[parfill]{parskip}
+#+LATEX_HEADER: \usepackage{color,hyperref}
+#+LATEX_HEADER: \hypersetup{colorlinks}
 
 #+ATTR_LATEX: :width 0.35\textwidth
 [[file:img/grid.png]]
