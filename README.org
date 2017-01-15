@@ -131,4 +131,5 @@
        set these heuristics up in [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of Search Heuristics]] (Rayner,
        Sturtevant, Bowling) but this article describes some extremely novel ways
        to use these mappings to control game entities.
+  - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Variants of A*]] :: Amit Patel lists some alternatives to A* search.
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
