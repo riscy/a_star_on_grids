@@ -11,7 +11,7 @@
  - [[#description][Description]]
      - [[#contributing][Contributing]]
  - [[#preliminaries][Preliminaries]]
- - [[#implement-the-open-list-using-a-heap][Implement the open list using a heap]]
+ - [[#implement-the-open-list-using-a-binary-heap][Implement the open list using a binary heap]]
  - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
  - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
      - [[#on-a-4-connected-grid][On a 4-connected grid]]
@@ -48,12 +48,12 @@
   get from the start state ~s~ to open state ~i~ (the value of which A*
   knows exactly).  ~h(i,g)~ is a cheaply computed heuristic estimate for the
   distance from ~i~ to the goal state ~g~.
-* Implement the open list using a heap
-  ...and implement the heap using an array.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][Example code]].
+* Implement the open list using a binary heap
+  ...and implement the heap using an array  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].
 
   Depending on the implementation language, this isn't as important for small
-  maps (on the order of a couple thousand cells).  On larger maps, this can cut
-  execution time in half.
+  grids (on the order of a couple thousand cells in a [[https://github.com/riscy/a_star_on_grids/tree/master/src][C++ implementation]]).  On
+  larger grids, this can cut execution time in half -- or better.
 
   Note it is common for multiple states on the open list have the lowest ~f~
   cost, so there is an opportunity to add [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][smart tie-breaking]] on larger ~g~
@@ -78,11 +78,11 @@
 *** On an 8-connected grid
     When pathfinding on an 8-connected grid, use the *octile heuristic*:
     #+begin_src ruby
-    h(i, j) = C * Δx + B * Δy   if Δx > Δy
-              C * Δy + B * Δx   else
+    h(i, j) = C * Δx + B * Δy if Δx > Δy
+              C * Δy + B * Δx else
     #+end_src 
     where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
-    being the cost to take a diagonal move.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][Example code]].
+    being the cost to take a diagonal move.  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][example code]].
   
     Note the octile heuristic can be written without a conditional (albeit with an
     absolute value), which may help improve instruction level parallelism:
@@ -90,7 +90,7 @@
     h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
     #+end_src
     where ~E = 2 * C - D~.  You can see how to simplify this further if both ~D~
-    and ~E~ are even numbers.  [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][Example code]].
+    and ~E~ are even numbers.  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][example code]].
     # A proof for this relies on using a 45-degree rotation matrix to
     # turn what is effectively a norm in Linfty into a norm in L1 space.
 * Modified move costs
@@ -123,13 +123,12 @@
     beneficial in many cases, but you should test it out before you use it.
 * Resources
   Additional resources that might also be helpful:
-  - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: This is a good starting point for learning
-       A*.
-  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
-  - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems and videos covering
-       some advanced topics.
+  - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
+  - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
+       videos covering fundamental and advanced topics.
   - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra Maps]] :: Dijkstra Maps are also known as "differential heuristics",
        "ALT heuristics", or "Lipschitz embeddings".  We looked at smart ways to
        set these heuristics up in [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of Search Heuristics]] (Rayner,
        Sturtevant, Bowling) but this article describes some extremely novel ways
        to use these mappings to control game entities.
+  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
