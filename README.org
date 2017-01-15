@@ -45,13 +45,13 @@
   iteration expands the /open list/ with the neighbors of an already open
   state.  The open state ~i~ that gets chosen is one with the lowest ~f~ cost,
   #+begin_src ruby
-  f_i(s,g) = g(s,i) + h(i,g)
+  f_i(s, g) = g(s, i) + h(i, g)
   #+end_src
 
   This ~f~ cost is an estimate of the cost of an optimal path between ~s~ and
-  ~g~ that goes through ~i~.  Here ~g(s,i)~ is the /ground truth/ distance to
+  ~g~ that goes through ~i~.  Here ~g(s, i)~ is the /ground truth/ distance to
   get from the start state ~s~ to open state ~i~ (the value of which A*
-  knows exactly).  ~h(i,g)~ is a cheaply computed heuristic estimate for the
+  knows exactly).  ~h(i, g)~ is a cheaply computed heuristic estimate for the
   distance from ~i~ to the goal state ~g~.
 * Implement the open list using a binary heap
   ...and implement the heap using an array  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].
@@ -76,7 +76,7 @@
     The distance between two cells on a 4-connected grid, assuming no obstacles,
     is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
     #+begin_src ruby
-    h(i,j) = C * (Δx + Δy)
+    h(i, j) = C * (Δx + Δy)
     #+end_src
     where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
     ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move, which
