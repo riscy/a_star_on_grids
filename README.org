@@ -30,7 +30,7 @@
 
   Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][source on github]] for some example code in C++.
 *** Download as PDF :noexport:
-    This document is available for download in [[https://github.com/riscy/a_star_on_grids/tree/master/pdf/a_star_on_grids.pdf][PDF]] format.
+    This document is available for download in [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][PDF]] format.
 *** Contributing
     If you have any (much appreciated) corrections or contributions, feel free
     to get in touch or to simply make a pull request.
