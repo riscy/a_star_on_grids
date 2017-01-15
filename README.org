@@ -1,8 +1,9 @@
 #+TITLE: Best practices for A* on grids
-#+OPTIONS: toc:3 author:t creator:nil num:nil
+#+OPTIONS: toc:nil author:t creator:nil num:nil
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
 
+#+ATTR_LATEX: :width 0.35\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
 
@@ -26,13 +27,13 @@
   eight-connected gridworlds.  This document is pitched at hobbyists and anyone
   looking for ideas on how to make an existing implementation a bit faster.
 
-  Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][src]] directory for some example code in C++.
+  Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][source on github]] for some example code in C++.
 *** Contributing
     If you have any (much appreciated) corrections or contributions, feel free
     to get in touch or to simply make a pull request.
 * Preliminaries
   Skip this if you're very familiar with A*.  If you're not, you might want to check
-  out the [[#resources][resources]] section.
+  out the resources section at the end of the document.
 
   Forgoing a complete description of A*, recall that A* is essentially a loop
   that expands a list of /open/ states that reach toward the goal.  Each
