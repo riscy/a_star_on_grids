@@ -20,11 +20,10 @@
  - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
      - [[#on-a-4-connected-grid][On a 4-connected grid]]
      - [[#on-an-8-connected-grid][On an 8-connected grid]]
- - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
- - [[#modified-move-costs][Modified move costs]]
-     - [[#diagonal-99cardinal-70][Diagonal: 99/Cardinal: 70]]
-     - [[#diagonal-3cardinal-2][Diagonal: 3/Cardinal: 2]]
-     - [[#diagonal-99cardinal-50][Diagonal: 99/Cardinal: 50]]
+ - [[#choose-cardinal-and-diagonal-move-costs-carefully][Choose cardinal and diagonal move costs carefully]]
+     - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
+     - [[#ensure-c--d--2c][Ensure C < D < 2C]]
+     - [[#use-high-performing-move-costs][Use high-performing move costs]]
  - [[#resources][Resources]]
 
 * Description
@@ -63,11 +62,10 @@
   grids (on the order of a couple thousand cells in a [[https://github.com/riscy/a_star_on_grids/tree/master/src][C++ implementation]]).  On
   larger grids, this can cut execution time in half -- or better.
 
-  Note it is common for multiple states on the open list have the lowest ~f~
-  cost, so there is an opportunity to add [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][smart tie-breaking]] on larger ~g~
-  values.  This makes A* focus on deep solutions rather than a breadth of
-  shallow solutions.  My Ph.D. co-supervisor Nathan Sturtevant has [[http://movingai.com/astar.html][a video
-  demonstrating this]].
+  It is common for more than one state on the open list to have the lowest ~f~
+  cost.  In this case it is better to make A* focus on deep solutions rather
+  than a breadth of shallow solutions by [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][tie-breaking]] on larger ~g~ values.  My
+  Ph.D. co-supervisor Nathan Sturtevant has [[http://movingai.com/astar.html][a video demonstrating this]].
 * Avoid floating point arithmetic
   Prefer integral data types wherever possible.  This is not only faster but
   helps to avoid the numerical imprecision that can confuse debugging attempts.
@@ -102,38 +100,43 @@
     and ~E~ are even numbers.  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][example code]].
     # A proof for this relies on using a 45-degree rotation matrix to
     # turn what is effectively a norm in Linfty into a norm in L1 space.
-* Avoid same-cost diagonal and cardinal moves
-  ...for instance, by having diagonal and cardinal moves both cost ~1~.  This
-  greatly increases the number of optimal paths and subsequently the average
-  number of nodes A* expands.
-* Modified move costs
-  On an 8-connected grid, the cost of a diagonal move (~D~) relative to the cost of a cardinal
-  move (~C~) affects the appearance of the resulting paths.  If a diagonal move costs
-  /less/ than a cardinal move, A* prefers zigzagging paths.  If a diagonal move
-  costs more than /two/ cardinal moves, A* prefers rectilinear paths.
+* Choose cardinal and diagonal move costs carefully
+  On an 8-connected grid, the cost of a diagonal move (~D~) relative to the cost
+  of a cardinal move (~C~) not only affects the appearance of the paths A*
+  generates, but also its efficiency.  (Fringe Search is also /hugely/ sensitive
+  to changes in cost structure.)
+*** Avoid same-cost diagonal and cardinal moves
+    When entities can move cardinally /or/ diagonally once per time-step, the
+    instinct is to tell A* the moves have the same cost (e.g., ~C = D = 1~).
+    But this increases the number of unique optimal paths across the grid, which
+    can significantly increase the amount of work A* has to do.
+*** Ensure C < D < 2C
+    If a diagonal move costs /less/ than a cardinal move, A* prefers zigzagging
+    paths.  If a diagonal move costs more than /two/ cardinal moves, A* prefers
+    rectilinear paths.
 
-  Paths tend to look best when the costs lie between these two extremes, but
-  some algorithms (like Fringe Search) are hugely sensitive to changes in cost
-  structure.  You might try one of the following.
-*** Diagonal: 99/Cardinal: 70
-    If you prefer a diagonal move to cost ~sqrt(2)~ relative to a
-    cardinal move, try using ~D = 99~ for the cost of a diagonal move and ~C = 70~ for
-    the cost of a cardinal move.  This close approximation helps to avoid
-    floating point arithmetic.
-*** Diagonal: 3/Cardinal: 2
-    If your heuristic can return fractional values, ~D = 3/C = 2~ gives you the
-    ability to take the /ceiling/ of those fractional heuristics since all
-    distances must be integral.  This is still reasonably close to a ~D/C~ ratio
-    of ~sqrt(2)~, and again you avoid floating point arithmetic.
+    Paths tend to look best when the costs lie between these two extremes.
+*** Use high-performing move costs
+***** ~D = 99~, ~C = 70~
+      If you prefer a diagonal move to cost ~sqrt(2)~ relative to a cardinal move,
+      try using ~D = 99~ for the cost of a diagonal move and ~C = 70~ for the cost
+      of a cardinal move.  This close approximation helps to avoid floating point
+      arithmetic.
+***** ~D = 3~, ~C = 2~
+      If your heuristic can return fractional values, ~D = 3/C = 2~ gives you the
+      ability to take the /ceiling/ of those fractional heuristics since all
+      distances must be integral.  This is still reasonably close to a ~D/C~ ratio
+      of ~sqrt(2)~, and again you avoid floating point arithmetic.
 
-    Nathan Sturtevant showed me this when we wrote
-    [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made
-    a noticeable difference.
-*** Diagonal: 99/Cardinal: 50
-    ~D = 99/C = 50~ gives something very close to a rectilinear cost structure.
-    On average this can keep the size of the open list smaller, but it can also
-    increase node expansions, depending on the layout of the grid.  This can be
-    beneficial in many cases, but you should test it out before you use it.
+      Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic
+      Optimization]] (Rayner, Bowling, Sturtevant), and it made a noticeable
+      difference.
+***** ~D = 99~, ~C = 50~
+      This gives something close to a rectilinear cost structure but retains a
+      preference for diagonal moves over pairs of cardinal moves.  On average this
+      can keep the size of the open list smaller, but it can also increase node
+      expansions, depending on the layout of the grid.  This can be beneficial in
+      many cases, but you should test it out before you use it.
 * Resources
   Additional resources that might also be helpful:
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
