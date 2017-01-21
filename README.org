@@ -4,9 +4,13 @@
 #+EMAIL: dchrisrayner@gmail.com
 #+LATEX_HEADER: \usepackage[parfill]{parskip}
 #+LATEX_HEADER: \usepackage{color,hyperref}
-#+LATEX_HEADER: \hypersetup{colorlinks}
+#+LATEX_HEADER: \definecolor{darkblue}{rgb}{0.2,0.2,0.7}
+#+LATEX_HEADER: \hypersetup{colorlinks,breaklinks,linkcolor=darkblue,urlcolor=darkblue,anchorcolor=darkblue,citecolor=darkblue}
+#+LATEX_HEADER: \usepackage{textgreek}
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [koma,utopia,10pt,microtype,paralist]
 
-#+ATTR_LATEX: :width 0.35\textwidth
+#+ATTR_LATEX: :width 0.15\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
 
@@ -15,69 +19,70 @@
      - [[#download-as-pdf][Download as PDF]]
      - [[#contributing][Contributing]]
  - [[#preliminaries][Preliminaries]]
- - [[#implement-the-open-list-using-a-binary-heap][Implement the open list using a binary heap]]
  - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
+ - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
+ - [[#implement-the-open-list-using-a-binary-heap][Implement the open list using a binary heap]]
  - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
      - [[#on-a-4-connected-grid][On a 4-connected grid]]
      - [[#on-an-8-connected-grid][On an 8-connected grid]]
- - [[#choose-cardinal-and-diagonal-move-costs-carefully][Choose cardinal and diagonal move costs carefully]]
+ - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
      - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
      - [[#ensure-c--d--2c][Ensure C < D < 2C]]
      - [[#use-high-performing-move-costs][Use high-performing move costs]]
- - [[#resources][Resources]]
+ - [[#additional-resources][Additional Resources]]
 
 * Description
-  Here are some simple notes on ways to improve A*, focusing on pathfinding on
-  four- and eight-connected grids.  This document is pitched at hobbyists and
-  anyone looking for ideas on how to make an existing implementation a bit
-  faster.
+  This document describes ways to improve A*, focusing on pathfinding on four-
+  and eight-connected grids.  It's pitched at hobbyists and anyone looking for
+  ways to make an existing implementation a bit faster.
 
-  Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][source on github]] for some example code in C++.
+  Check out the [[https://github.com/riscy/a_star_on_grids/tree/master/src][source on GitHub]] for some example code in C++.
 *** Download as PDF :noexport:
-    This document is available for download in [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][PDF]] format.
+    This document is available for download in [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][PDF]].
 *** Contributing
     If you have any (much appreciated) corrections or contributions, feel free
     to get in touch or simply make a pull request.
 * Preliminaries
-  Skip this if you're very familiar with A*.  If you're not, you might want to check
-  out the resources section at the end of the document.
+  Forgoing a complete description, recall that A* is essentially a loop that
+  expands a list of /open/ states that reach toward a goal state.  (For more
+  detail, visit the resources at the end of the document.)
 
-  Forgoing a complete description, recall that A* is essentially a loop
-  that expands a list of /open/ states that reach toward the goal.  Each
-  iteration expands the /open list/ with the neighbors of an already open
-  state.  The open state ~i~ that gets chosen is one with the lowest ~f~ cost,
+  Each iteration of the A* loop expands the /open list/ with the neighbors of a
+  state already on the open list.  The open state ~i~ that gets chosen is one
+  with the lowest ~f~ cost,
   #+begin_src ruby
-  f_i(s, g) = g(s, i) + h(i, g)
+  f_i = g(s,i) + h(i,j)
   #+end_src
-
-  This ~f~ cost is an estimate of the cost of an optimal path between ~s~ and
-  ~g~ that goes through ~i~.  Here ~g(s, i)~ is the /ground truth/ distance to
-  get from the start state ~s~ to open state ~i~ (the value of which A*
-  knows exactly).  ~h(i, g)~ is a cheaply computed heuristic estimate for the
-  distance from ~i~ to the goal state ~g~.
-* Implement the open list using a binary heap
-  ...and implement the heap using an array  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].
-
-  Depending on the implementation language, this isn't as important for small
-  grids (on the order of a couple thousand cells in a [[https://github.com/riscy/a_star_on_grids/tree/master/src][C++ implementation]]).  On
-  larger grids, this can cut execution time in half -- or better.
-
-  It is common for more than one state on the open list to have the lowest ~f~
-  cost.  In this case it is better to make A* focus on deep solutions rather
-  than a breadth of shallow solutions by [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][tie-breaking]] on larger ~g~ values.  My
-  Ph.D. co-supervisor Nathan Sturtevant has [[http://movingai.com/astar.html][a video demonstrating this]].
+  which is an estimate of the cost of a path starting at ~s~, going through ~i~,
+  and arriving at ~j~.  Here ~g(s,i)~ is the /ground truth/ cost to get from ~s~
+  to the open state ~i~ (which A* will have determined by this point).  ~h(i,j)~
+  is a cheaply computed /heuristic/ estimate for the cost to get from ~i~ to the
+  goal ~j~.
 * Avoid floating point arithmetic
   Prefer integral data types wherever possible.  This is not only faster but
   helps to avoid the numerical imprecision that can confuse debugging attempts.
+* Break ties in favor of path depth
+  It is common for more than one state on the open list to have the lowest ~f~
+  cost.  When this is the case it's better to make A* focus on deep solutions
+  rather than a breadth of shallow solutions by tie-breaking on larger ~g~
+  values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video that
+  demonstrates this]].  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example code]].)
+* Implement the open list using a binary heap
+  ...and implement the heap using an array.
+
+  This is enormously important on large grids, but less important for small
+  grids (on the order of a couple thousand states in a C++ implementation).  On
+  grids with very few obstacles, maintaining the heap might be more expensive
+  than linear scans of the open list.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].)
 * Use a non-overestimating heuristic
-  Heuristics that don't overestimate are called /admissible/.  A* recovers an optimal
-  path when it's using an admissible heuristic.  A good, admissible grid
-  heuristic is the "distance" between two cells assuming no obstacles.
+  Heuristics that don't overestimate are called /admissible/.  A* recovers an
+  optimal (cheapest) path when its heuristic is admissible.  A good, admissible
+  grid heuristic is the "distance" between two cells assuming no obstacles.
 *** On a 4-connected grid
-    The distance between two cells on a 4-connected grid, assuming no obstacles,
-    is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
+    The distance between two states on a 4-connected grid, assuming no
+    obstacles, is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
     #+begin_src ruby
-    h(i, j) = C * (Δx + Δy)
+    h(i,j) = C * (Δx + Δy)
     #+end_src
     where ~Δx~ and ~Δy~ are absolute distances between grid cells along the
     ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move, which
@@ -85,67 +90,61 @@
 *** On an 8-connected grid
     When pathfinding on an 8-connected grid, use the *octile* heuristic:
     #+begin_src ruby
-    h(i, j) = C * Δx + B * Δy if Δx > Δy
-              C * Δy + B * Δx else
-    #+end_src 
+    h(i,j) = C * Δx + B * Δy   if Δx > Δy
+             C * Δy + B * Δx   else
+    #+end_src
     where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
-    being the cost to take a diagonal move.  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][example code]].
-  
+    being the cost to take a diagonal move.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L54][example code]].)
+
     Note the octile heuristic can be written without a conditional (albeit with an
     absolute value), which may help improve instruction level parallelism:
     #+begin_src ruby
-    h(i, j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
+    h(i,j) = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
     #+end_src
     where ~E = 2 * C - D~.  You can see how to simplify this further if both ~D~
-    and ~E~ are even numbers.  See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][example code]].
+    and ~E~ are even.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L62][example code]].)
     # A proof for this relies on using a 45-degree rotation matrix to
     # turn what is effectively a norm in Linfty into a norm in L1 space.
-* Choose cardinal and diagonal move costs carefully
-  On an 8-connected grid, the cost of a diagonal move (~D~) relative to the cost
-  of a cardinal move (~C~) not only affects the appearance of the paths A*
-  generates, but also its efficiency.  (Fringe Search is also /hugely/ sensitive
-  to changes in cost structure.)
+* Choose cardinal/diagonal move costs carefully
+  On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
+  the cost of a cardinal move (~C~) not only affects the appearance of the paths
+  A* generates, but also its efficiency.  (A* isn't alone in this; the [[https://en.wikipedia.org/wiki/Fringe_search][Fringe
+  Search]] algorithm is also very sensitive to changes in cost structure.)
 *** Avoid same-cost diagonal and cardinal moves
-    When entities can move cardinally /or/ diagonally once per time-step, the
-    instinct is to tell A* the moves have the same cost (e.g., ~C = D = 1~).
-    But this increases the number of unique optimal paths across the grid, which
-    can significantly increase the amount of work A* has to do.
+    When entities move cardinally /or/ diagonally once per time-step, the
+    instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
+    ~C = D = 1~).  While technically true, this increases the number of unique
+    optimal paths across the grid; A* is more efficient when it has fewer
+    options.
 *** Ensure C < D < 2C
     If a diagonal move costs /less/ than a cardinal move, A* prefers zigzagging
     paths.  If a diagonal move costs more than /two/ cardinal moves, A* prefers
-    rectilinear paths.
-
-    Paths tend to look best when the costs lie between these two extremes.
+    rectilinear paths like you'd see on a 4-connected grid.  Paths tend to look
+    best when the costs lie between these two extremes.
 *** Use high-performing move costs
-***** ~D = 99~, ~C = 70~
-      If you prefer a diagonal move to cost ~sqrt(2)~ relative to a cardinal move,
-      try using ~D = 99~ for the cost of a diagonal move and ~C = 70~ for the cost
-      of a cardinal move.  This close approximation helps to avoid floating point
-      arithmetic.
-***** ~D = 3~, ~C = 2~
-      If your heuristic can return fractional values, ~D = 3/C = 2~ gives you the
-      ability to take the /ceiling/ of those fractional heuristics since all
-      distances must be integral.  This is still reasonably close to a ~D/C~ ratio
-      of ~sqrt(2)~, and again you avoid floating point arithmetic.
-
-      Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean Heuristic
-      Optimization]] (Rayner, Bowling, Sturtevant), and it made a noticeable
-      difference.
-***** ~D = 99~, ~C = 50~
-      This gives something close to a rectilinear cost structure but retains a
-      preference for diagonal moves over pairs of cardinal moves.  On average this
-      can keep the size of the open list smaller, but it can also increase node
-      expansions, depending on the layout of the grid.  This can be beneficial in
-      many cases, but you should test it out before you use it.
-* Resources
-  Additional resources that might also be helpful:
+    The following cost structures work well in practice.  Results can vary
+    depending on the obstacles in the grid, so test before using.
+    - ~D = 99~, ~C = 70~ :: If you prefer a diagonal move to cost ~sqrt(2)~
+         relative to a cardinal move, try ~D = 99~ and ~C = 70~.  This close
+         approximation helps to avoid floating point arithmetic.
+    - ~D = 3~, ~C = 2~ :: This is still close to a ~D/C~ ratio of ~sqrt(2)~ and
+         remains integral.  Moreover, if ~h(i,j)~ is admissible but non-integral
+         for whatever reason, then its [[https://en.wikipedia.org/wiki/Floor_and_ceiling_functions][ceiling]] is admissible and can be used
+         instead.  Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean
+         Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made a
+         noticeable difference.
+    - ~D = 99~, ~C = 50~ :: This gives something close to rectilinear costs but
+         retains a preference for diagonal moves over pairs of cardinal moves.
+         On average this keeps the size of the open list smaller, but it can
+         also increase node expansions.  Usually it is noticeably faster.
+* Additional Resources
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
        videos covering fundamental and advanced topics.
-  - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra Maps]] :: Dijkstra Maps are also known as "differential heuristics",
-       "ALT heuristics", or "Lipschitz embeddings".  We looked at smart ways to
-       set these heuristics up in [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of Search Heuristics]] (Rayner,
-       Sturtevant, Bowling) but this article describes some extremely novel ways
-       to use these mappings to control game entities.
-  - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Variants of A*]] :: Amit Patel lists some alternatives to A* search.
+  - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra Maps]] :: Dijkstra Maps have also been called "differential
+       heuristics", "ALT heuristics", or "Lipschitz embeddings".  We looked at
+       smart ways to set these heuristics up in [[https://webdocs.cs.ualberta.ca/~bowling/papers/13ijcai-hsubset.pdf][Subset Selection of Search
+       Heuristics]] (Rayner, Sturtevant, Bowling) but this article describes some
+       extremely novel ways to use these mappings to control game entities.
+  - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Amit Patel's variants of A*]] :: A listing of some alternatives to A*.
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
