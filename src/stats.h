@@ -11,7 +11,7 @@ class Stats {
   size_t nodes_expanded;        // nodes expanded to make path
   size_t path_length;           // number of nodes on path
   size_t open_list_size;        // size of open list at termination
-  float path_cost;              // cumulative edge cost on path
+  double path_cost;             // cumulative edge cost on path
   clock_t start_time;           // for timing
 
   Stats(string label = "Stats") {
