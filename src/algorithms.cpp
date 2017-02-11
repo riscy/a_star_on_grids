@@ -137,14 +137,14 @@ void astar_heap(Graph & graph, Node* ss, Node* gg, Stats & stats,
       const int g = expand_me->g + cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
         add_me->whence = expand_me;
+        add_me->f = g + h(add_me, gg);
         add_me->g = g;
-        add_me->f = add_me->g + h(add_me, gg);
         add_me->open = true;
         node_heap::push(open_list, add_me);
       }
       else if (g < add_me->g) {  // If it is open, relax it
         add_me->whence = expand_me;
-        add_me->f = add_me->f - add_me->g + g;
+        add_me->f = g + add_me->f - add_me->g;
         add_me->g = g;
         node_heap::repair(open_list, add_me->heap_index);
       }
