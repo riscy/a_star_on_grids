@@ -162,7 +162,7 @@
     if the methods in this document are applied.  But with compiler
     optimizations off, Fringe Search is faster than A*.  Because of this, it's
     reasonable to assume that Fringe Search might be the faster choice in
-    interpreted scripting languages, and is worth considering.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L167][example
+    interpreted scripting languages, and is worth considering.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][example
     code]].)
 * Additional Resources
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
