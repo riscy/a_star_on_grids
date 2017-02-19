@@ -27,6 +27,7 @@
      - [[#use-a-binary-heap][Use a binary heap]]
      - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
      - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
+     - [[#consider-fringe-search][Consider Fringe Search]]
  - [[#additional-resources][Additional Resources]]
 
 * Description
@@ -49,10 +50,10 @@
   #+begin_src ruby
   f_i = g_i + h_i
   #+end_src
-  which is an estimate of the cost of a path going through ~i~ and arriving at
+  which is an estimate of the cost of a path going through ~i~ and continuing to
   the goal.  Here ~g_i~ is the cost of the cheapest path to state ~i~ that A*
-  has generated so far, and ~h_i~ is a cheaply computed /heuristic estimate/ for
-  the cost to get from ~i~ to the goal.
+  has generated so far, and ~h_i~ is an efficiently computed /heuristic
+  estimate/ for the cost to get from ~i~ to the goal.
 
   (For further detail, visit the resources at the end of the document.)
 * Heuristics and move costs
@@ -95,7 +96,7 @@
     On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
     the cost of a cardinal move (~C~) not only affects the appearance of the paths
     A* generates, but also its efficiency.  (A* isn't alone in this; the [[https://en.wikipedia.org/wiki/Fringe_search][Fringe
-    Search]] algorithm is also very sensitive to changes in cost structure.)
+    Search]] algorithm is also sensitive to changes in cost structure.)
 ***** Avoid same-cost diagonal and cardinal moves
       When the entity can move cardinally /or/ diagonally once per time-step, the
       instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
@@ -128,10 +129,9 @@
     ...and implement the heap using an array.
 
     This is enormously important on large grids, but admittedly less important
-    for small grids -- on the order of a couple thousand states in a C++
-    implementation.  On grids with very few obstacles, maintaining the heap
-    might be more expensive than linear scans of the open list.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example
-    code]].)
+    for small grids -- on the order of a couple thousand states in optimized
+    C++.  On grids with few obstacles, maintaining the heap might be more
+    expensive than linear scans of the open list.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].)
 *** Break ties in favor of path depth
     It is common for more than one state on the open list to have the lowest ~f~
     cost.  When this is the case it's better to make A* focus on deep solutions
@@ -152,7 +152,18 @@
     #+begin_src ruby
     f_new = g_new + f_current - g_current
     #+end_src
-    (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L147][example code]].)
+    (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][example code]].)
+*** Consider Fringe Search
+    [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
+    growing and maintaining the open list.  The implementation is quite similar
+    to A*.
+
+    With compiler optimizations on, Fringe Search is slower than A* -- but only
+    if the methods in this document are applied.  But with compiler
+    optimizations off, Fringe Search is faster than A*.  Because of this, it's
+    reasonable to assume that Fringe Search might be the faster choice in
+    interpreted scripting languages, and is worth considering.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L167][example
+    code]].)
 * Additional Resources
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
