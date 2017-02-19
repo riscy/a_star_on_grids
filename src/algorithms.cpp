@@ -8,6 +8,9 @@ using namespace std;
 #include "stats.h"
 #include "node_heap.h"
 
+typedef list<Node*>::iterator list_iter;
+typedef vector<Node*>::iterator vector_iter;
+
 // These algorithms 'close' nodes by flagging them with the id of the
 // current problem being solved.  This saves us unclosing every node
 // after solving each path.
@@ -38,40 +41,31 @@ inline void reconstruct_path(Node* start, Node* current,
 /// Additionally contains some validations on the result.
 void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
                  unsigned int (*h)(Node* n1, Node* n2)) {
-  unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
-  typedef vector<Node*>::iterator iter;
   static vector<Node*> open_list;
   start->open = true;
   start->relax(0, h(start, goal), NULL);
   open_list.push_back(start);
 
-  // Pop the best node off the open_list
   while (!open_list.empty()) {
-    int g = 0, fmin = INT_MAX;
-    iter ii_best;
-    for (iter ii = open_list.begin(); ii != open_list.end(); ++ ii) {
-      Node * nd = *ii;
-      if (nd->f > fmin)
-        continue;
-      if (nd->f <= fmin || nd->g > g) {
-        fmin = nd->f;
-        g = nd->g;
-        ii_best = ii;
+    int fmin = INT_MAX;
+    vector_iter best_on_open_list;
+    // Pop the best node off the open_list via linear scan
+    for (vector_iter node = open_list.begin();
+         node != open_list.end(); ++ node) {
+      if ((*node)->f < fmin) {
+        fmin = (*node)->f;
+        best_on_open_list = node;
       }
     }
-    Node *expand_me = *ii_best;
-    expand_me->open = false;
-
-    // remove it by replacing it with the back() node
-    *ii_best = open_list.back();
-    open_list.pop_back();
-
-    // expand and close the best
-    if (expand_me == gg)
+    Node* expand_me = *best_on_open_list;
+    if (expand_me == goal)
       break;
     expand_me->expand(problem_id);
     ++ stats.nodes_expanded;
+    // remove it by overwriting it with the back() node
+    *best_on_open_list = open_list.back();
+    open_list.pop_back();
 
     // Add each neighbor
     for (vector_iter ii = expand_me->neighbors_out.begin();
@@ -79,7 +73,7 @@ void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
       Node* add_me = *ii;
       if (add_me->closed(problem_id))
         continue;
-      int g = expand_me->g + cost(expand_me, add_me);
+      const int g = expand_me->g + graph.cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
         add_me->open = true;
         add_me->relax(g, h(add_me, goal), expand_me);
@@ -102,9 +96,7 @@ void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
 /// A* with a binary heap.
 void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
                 unsigned int (*h)(Node* n1, Node* n2)) {
-  unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
-  typedef vector<Node*>::iterator iter;
   static vector<Node*> open_list;
   start->open = true;
   start->relax(0, h(start, goal), NULL);
@@ -121,15 +113,12 @@ void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
     node_heap::pop(open_list);
 
     // Add each neighbor
-    for (iter ii = expand_me->neighbors_out.begin(), end = expand_me->neighbors_out.end();
-         ii != end; ++ ii) {
+    for (vector_iter ii = expand_me->neighbors_out.begin();
+           ii != expand_me->neighbors_out.end(); ++ ii) {
       Node* add_me = *ii;
       if (add_me->closed(problem_id))
         continue;
-
-      // NOTE: you can implement greedy best-first search by setting g = 0 here,
-      // or weighted A* by scaling h up by some scalar > 1.
-      const int g = expand_me->g + cost(expand_me, add_me);
+      const int g = expand_me->g + graph.cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
         add_me->open = true;
         add_me->relax(g, h(add_me, goal), expand_me);
