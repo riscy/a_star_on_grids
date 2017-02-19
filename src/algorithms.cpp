@@ -19,7 +19,7 @@ inline void init_new_problem(Graph & graph, Stats & stats) {
   // check integer overflow; problem_ids are no longer unique, so reset.
   if (problem_id == 0) {
     for (size_t ii = 0; ii < graph.graph_view.size(); ++ ii)
-      graph.graph_view[ii]->closed = 0;
+      graph.graph_view[ii]->closed_id = 0;
     problem_id = 1;
   }
 }
@@ -36,16 +36,15 @@ inline void reconstruct_path(Node* start, Node* current,
 
 /// A-star with no optimizations, not even sorting the open list.
 /// Additionally contains some validations on the result.
-void astar_basic(Graph & graph, Node* ss, Node* gg, Stats & stats,
+void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
                  unsigned int (*h)(Node* n1, Node* n2)) {
   unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
   typedef vector<Node*>::iterator iter;
   static vector<Node*> open_list;
-  open_list.push_back(ss);
-  ss->open = true;
-  ss->g = 0;
-  ss->f = h(ss, gg);
+  start->open = true;
+  start->relax(0, h(start, goal), NULL);
+  open_list.push_back(start);
 
   // Pop the best node off the open_list
   while (!open_list.empty()) {
@@ -71,81 +70,73 @@ void astar_basic(Graph & graph, Node* ss, Node* gg, Stats & stats,
     // expand and close the best
     if (expand_me == gg)
       break;
-    expand_me->closed = problem_id;
+    expand_me->expand(problem_id);
     ++ stats.nodes_expanded;
 
-    // add its neighbors
-    for (iter ii = expand_me->neighbors_out.begin(); ii != expand_me->neighbors_out.end(); ++ ii) {
-      Node * add_me = *ii;
-      if (add_me->closed == problem_id)
+    // Add each neighbor
+    for (vector_iter ii = expand_me->neighbors_out.begin();
+         ii != expand_me->neighbors_out.end(); ++ ii) {
+      Node* add_me = *ii;
+      if (add_me->closed(problem_id))
         continue;
       int g = expand_me->g + cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
-        add_me->whence = expand_me;
-        add_me->g = g;
-        add_me->f = add_me->g + h(add_me, gg);
-        open_list.push_back(add_me);
         add_me->open = true;
+        add_me->relax(g, h(add_me, goal), expand_me);
+        open_list.push_back(add_me);
       }
       else if (add_me->g > g) {  // If it is open, relax it
-        add_me->whence = expand_me;
-        add_me->f = add_me->f - add_me->g + g;
-        add_me->g = g;
+        add_me->relax(g, h(add_me, goal), expand_me);
       }
     }
   }
 
   // Stats collection & cleanup
   stats.open_list_size += open_list.size();
-  reconstruct_path(ss, gg, cost, stats);
-  for (iter ii = open_list.begin(); ii != open_list.end(); ++ ii)
+  reconstruct_path(start, goal, graph.cost, stats);
+  for (vector_iter ii = open_list.begin(); ii != open_list.end(); ++ ii)
     (*ii)->open = false;
   open_list.clear();
 }
 
 /// A* with a binary heap.
-void astar_heap(Graph & graph, Node* ss, Node* gg, Stats & stats,
+void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
                 unsigned int (*h)(Node* n1, Node* n2)) {
   unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
   typedef vector<Node*>::iterator iter;
   static vector<Node*> open_list;
-  ss->open = true;
-  ss->g = 0;
-  ss->f = h(ss, gg);
-  node_heap::push(open_list, ss);
+  start->open = true;
+  start->relax(0, h(start, goal), NULL);
+  node_heap::push(open_list, start);
 
   while (!open_list.empty()) {
     // Pop the best node off the open_list (+ goal check)
     Node* expand_me = open_list.front();
-    if (expand_me == gg)
+    if (expand_me == goal)
       break;
-    expand_me->closed = problem_id;
-    expand_me->open = false;
-    node_heap::pop(open_list);
+
     ++ stats.nodes_expanded;
+    expand_me->expand(problem_id);
+    node_heap::pop(open_list);
 
     // Add each neighbor
     for (iter ii = expand_me->neighbors_out.begin(), end = expand_me->neighbors_out.end();
          ii != end; ++ ii) {
       Node* add_me = *ii;
-      if (add_me->closed == problem_id)
+      if (add_me->closed(problem_id))
         continue;
 
       // NOTE: you can implement greedy best-first search by setting g = 0 here,
       // or weighted A* by scaling h up by some scalar > 1.
       const int g = expand_me->g + cost(expand_me, add_me);
       if (!add_me->open) {       // If it's not open, open it
-        add_me->whence = expand_me;
-        add_me->f = g + h(add_me, gg);
-        add_me->g = g;
         add_me->open = true;
+        add_me->relax(g, h(add_me, goal), expand_me);
         node_heap::push(open_list, add_me);
       }
       else if (g < add_me->g) {  // If it is open, relax it
-        add_me->whence = expand_me;
-        add_me->f = g + add_me->f - add_me->g;
-        add_me->g = g;
+        add_me->relax(g, add_me->f - add_me->g, expand_me);
         node_heap::repair(open_list, add_me->heap_index);
       }
     }
@@ -153,8 +144,8 @@ void astar_heap(Graph & graph, Node* ss, Node* gg, Stats & stats,
 
   // Stats collection & cleanup
   stats.open_list_size += open_list.size();
-  reconstruct_path(ss, gg, cost, stats);
-  for (iter ii = open_list.begin(), end = open_list.end(); ii != end; ++ ii)
+  reconstruct_path(start, goal, graph.cost, stats);
+  for (vector_iter ii = open_list.begin(); ii != open_list.end(); ++ ii)
     (*ii)->open = false;
   open_list.clear();
 }
@@ -164,18 +155,20 @@ void astar_heap(Graph & graph, Node* ss, Node* gg, Stats & stats,
 // of f values at a time.  Fringe search does this in a depth-first fashion,
 // favoring the expansion of recently touched nodes, which can be accommodated
 // by inserting entries into a linked list.
-void fringe_search(Graph & graph, Node* ss, Node* gg, Stats & stats,
+//
+// Without aggressive compiler optimizations, Fringe Search beats A* handily.
+void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
                    unsigned int (*h)(Node* n1, Node* n2)) {
   unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
   static list<Node*> Fringe;
   typedef list<Node*>::iterator iter;
-  Fringe.push_back(ss);
-  ss->open = true;
-  ss->g = 0;
-  ss->fringe_index = Fringe.begin();
-  int flimit = ss->f = h(ss, gg);
+  Fringe.push_back(start);
+  start->open = true;
+  start->relax(0, h(start, goal), NULL);
+  start->fringe_index = Fringe.begin();
   bool found = false;
+  int flimit = start->f;
 
   do {
     int fnext = INT_MAX;
@@ -241,27 +234,27 @@ void fringe_search(Graph & graph, Node* ss, Node* gg, Stats & stats,
 
   // Stats collection & cleanup
   stats.open_list_size += Fringe.size();
-  reconstruct_path(ss, gg, cost, stats);
-  for (iter ff = Fringe.begin(); ff != Fringe.end(); ++ ff)
+  reconstruct_path(start, goal, graph.cost, stats);
+  for (list_iter ff = Fringe.begin(); ff != Fringe.end(); ++ ff)
     (*ff)->open = false;
   Fringe.clear();
 }
 
 /// Basic learning real-time search
-void lrta_basic(Graph & graph, Node* ss, Node* gg, Stats & stats,
+void lrta_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
                 unsigned int (*h)(Node* n1, Node* n2)) {
   unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
-  while (ss != gg) {
+  while (start != goal) {
     Node* best_neighbor = 0;
     unsigned int best_f = INT_MAX;
     stats.nodes_expanded += 1;
-    for (size_t ii = 0; ii < ss->neighbors_out.size(); ++ ii) {
-      Node* neighb = ss->neighbors_out[ii];
+    for (size_t ii = 0; ii < start->neighbors_out.size(); ++ ii) {
+      Node* neighb = start->neighbors_out[ii];
       // set default heuristic value if it isn't set
-      if (neighb->closed != problem_id) {
-        neighb->f = h(neighb, gg);
-        neighb->closed = problem_id;
+      if (!(neighb->closed(problem_id))) {
+        neighb->expand(problem_id);
+        neighb->f = h(neighb, goal);
       }
       unsigned int f = cost(ss, neighb) + neighb->f;
       if (!best_neighbor || f < best_f) {
@@ -271,9 +264,9 @@ void lrta_basic(Graph & graph, Node* ss, Node* gg, Stats & stats,
       else if (f == best_f && stats.nodes_expanded % 2)
         best_neighbor = neighb;
     }
-    ss->f = best_f; // learning update
-    stats.path_cost += cost(ss, best_neighbor);
-    ss = best_neighbor;
+    start->f = best_f; // learning update
+    stats.path_cost += graph.cost(start, best_neighbor);
+    start = best_neighbor;
   }
   stats.path_length = stats.nodes_expanded;
 }

@@ -12,7 +12,7 @@ using namespace std;
 Node::Node() {
   this->f = 0;
   this->open = 0;
-  this->closed = 0;
+  this->closed_id = 0;
   this->g = 0;
   this->glyph = 0;
   this->heap_index = -1;
@@ -32,6 +32,17 @@ string Node::to_str(bool verbose) {
     bc << neighbors_in[ii]->grid_x << "," << neighbors_in[ii]->grid_y << ";";
   bc << ")";
   return bc.str();
+}
+
+void Node::relax(int g, int h, Node* whence) {
+  this->f = g + h;
+  this->g = g;
+  this->whence = whence;
+}
+
+void Node::expand(int problem_id) {
+  this->closed_id = problem_id;
+  this->open = false;
 }
 
 void Graph::clear() {
@@ -80,7 +91,7 @@ void Graph::load_ascii_map(string filename, EdgeType edge_type, bool corner_cut)
         node->f = 0;
         node->glyph = 0;
         node->open = 0;
-        node->closed = 0;
+        node->closed_id = 0;
         graph_view.push_back(node);
         grid_view.push_back(node);
       }

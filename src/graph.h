@@ -19,12 +19,15 @@ class Node {
   // pathfinding variables
   int g, f;                     // recorded g and f costs
   int heap_index;               // location in the heap
-  int closed;
+  int closed_id;
   bool open;
   Node * whence;                      // for reconstructing paths
   list<Node*>::iterator fringe_index; // used by fringe search
 
   Node();
+  void expand(int problem_id);
+  void relax(int g, int h, Node* whence);
+  inline bool closed(int problem_id) { return this->closed_id == problem_id; }
   string to_str(bool verbose = false);
 };
 
