@@ -148,10 +148,8 @@ void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
 // Without aggressive compiler optimizations, Fringe Search beats A* handily.
 void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
                    unsigned int (*h)(Node* n1, Node* n2)) {
-  unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
   static list<Node*> Fringe;
-  typedef list<Node*>::iterator iter;
   Fringe.push_back(start);
   start->open = true;
   start->relax(0, h(start, goal), NULL);
@@ -159,67 +157,55 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
   bool found = false;
   int flimit = start->f;
 
-  do {
+  while (!found && !Fringe.empty()) {
     int fnext = INT_MAX;
-    iter ff = Fringe.begin();
-    while (ff != Fringe.end()) {
+    for (list_iter ff = Fringe.begin(); ff != Fringe.end();) {
       Node* expand_me = *ff;
-      int f = expand_me->g + h(expand_me, gg);
-
-      // Consider this node (is `expand_me' outside our depth?)
-      if (f > flimit) {
-        // keep track of smallest next depth
-        if (f < fnext) {
-          fnext = f;
-        }
+      // is this node outside the current depth?
+      if (expand_me->f > flimit) {
+        if (expand_me->f < fnext)
+          fnext = expand_me->f; // track smallest next depth
         ++ ff;
         continue; // skip this one (for now)
       }
-      else if (expand_me == gg) {
-        // is `expand_me' the goal and within our depth?
+      if (expand_me == goal) {
         found = true;
         break;
       }
 
-      // Expand this node: relax its neighbors' g-values and
-      // put them on the fringe directly AFTER `expand_me'
       ++ stats.nodes_expanded;
-      for (vector<Node*>::iterator jj = expand_me->neighbors_out.begin();
-           jj != expand_me->neighbors_out.end(); ++ jj) {
-        Node* relax_me = *jj;
-        int g = expand_me->g + cost(expand_me, relax_me);
-        // jj is or has been on the fringe?
-        if (relax_me->open || relax_me->closed == problem_id) {
-          // is this a worse path?
-          if (g >= relax_me->g)
-            continue;
-        }
-        iter insertion_point = ff;
-        ++ insertion_point;
-        if (!relax_me->open) {
-          // if not already open, insert jj after expand_me
-          relax_me->fringe_index = Fringe.insert(insertion_point, relax_me);
-          relax_me->open = true;
-        }
-        else if (*insertion_point != relax_me) {
-          // if open, move it to right after expand_me
-          Fringe.erase(relax_me->fringe_index);
-          relax_me->fringe_index = Fringe.insert(insertion_point, relax_me);
-        }
-        relax_me->g = g;
-        relax_me->whence = expand_me;
-      }
+      expand_me->expand(problem_id);
 
-      // Remove expand_me from Fringe
-      expand_me->open = false;
-      expand_me->closed = problem_id;
-      expand_me->fringe_index = Fringe.end();
+      // Relax the neighbors and put them on the fringe AFTER `expand_me'
+      for (vector_iter ii = expand_me->neighbors_out.begin();
+           ii != expand_me->neighbors_out.end(); ++ ii) {
+        Node* add_me = *ii;
+        if (add_me->closed(problem_id))
+          continue;
+        const int g = expand_me->g + graph.cost(expand_me, add_me);
+
+        list_iter insertion_point = ff;
+        ++ insertion_point;
+
+        if (!add_me->open) {
+          // if not already open, insert add_me after expand_me
+          add_me->open = true;
+          add_me->relax(g, h(add_me, goal), expand_me);
+          add_me->fringe_index = Fringe.insert(insertion_point, add_me);
+        }
+        else if (g < add_me->g) {
+          add_me->relax(g, add_me->f - add_me->g, expand_me);
+          if (*insertion_point != add_me) {
+            Fringe.erase(add_me->fringe_index);
+            add_me->fringe_index = Fringe.insert(insertion_point, add_me);
+          }
+        }
+      }
       ff = Fringe.erase(ff);
     }
-
     // Increase the depth and scan the fringe again
     flimit = fnext;
-  } while (!found && !Fringe.empty());
+  }
 
   // Stats collection & cleanup
   stats.open_list_size += Fringe.size();
@@ -232,7 +218,6 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
 /// Basic learning real-time search
 void lrta_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
                 unsigned int (*h)(Node* n1, Node* n2)) {
-  unsigned int (*cost)(Node*, Node*) = graph.cost;
   init_new_problem(graph, stats);
   while (start != goal) {
     Node* best_neighbor = 0;
@@ -245,7 +230,7 @@ void lrta_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
         neighb->expand(problem_id);
         neighb->f = h(neighb, goal);
       }
-      unsigned int f = cost(ss, neighb) + neighb->f;
+      unsigned int f = graph.cost(start, neighb) + neighb->f;
       if (!best_neighbor || f < best_f) {
         best_neighbor = neighb;
         best_f = f;
