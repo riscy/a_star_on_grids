@@ -1,12 +1,10 @@
 #include <iostream>
-#include <vector>
 #include <sstream>
 #include <fstream>
 using namespace std;
 #include <cassert>
 #include <cstdlib>
 #include "graph.h"
-#include "algorithms.h"
 #include "heuristics.h"
 
 Node::Node() {
@@ -25,11 +23,11 @@ string Node::to_str(bool verbose) {
     return bc.str();
   }
   bc << grid_x << "," << grid_y << endl << "Out: (";
-  for (size_t ii = 0; ii < neighbors_out.size(); ++ ii)
-    bc << neighbors_out[ii]->grid_x << "," << neighbors_out[ii]->grid_y << ";";
+  for (auto& neighbor_out: neighbors_out)
+    bc << neighbor_out->grid_x << "," << neighbor_out->grid_y << ";";
   bc << ")" << endl << "In: (";
-  for (size_t ii = 0; ii < neighbors_in.size(); ++ ii)
-    bc << neighbors_in[ii]->grid_x << "," << neighbors_in[ii]->grid_y << ";";
+  for (auto& neighbor_in: neighbors_in)
+    bc << neighbor_in->grid_x << "," << neighbor_in->grid_y << ";";
   bc << ")";
   return bc.str();
 }
@@ -46,11 +44,8 @@ void Node::expand(int problem_id) {
 }
 
 void Graph::clear() {
-  for (vector<Node*>::iterator it = graph_view.begin();
-       it != graph_view.end(); ++ it) {
-    Node * nd = *it;
+  for (auto& nd: graph_view)
     delete nd;
-  }
   grid_view.clear();
   graph_view.clear();
   width = 0;
@@ -189,17 +184,15 @@ size_t Graph::add_octile_edges(bool corner_cut) {
 
   if (!corner_cut) {
     size_t cuts = 0;
-    for (size_t ii = 0; ii < graph_view.size(); ++ ii) {
-      Node * nd1 = graph_view[ii];
+    for (auto& nd1: graph_view) {
       // For each diagonal neighbor of nd1:
       for (size_t jj = 0; jj < nd1->neighbors_out.size(); ++ jj) {
-        Node * dn = nd1->neighbors_out[jj];
+        Node* dn = nd1->neighbors_out[jj];
         if (abs(nd1->grid_x - dn->grid_x) + abs(nd1->grid_y - dn->grid_y) != 2)
           continue;
         // Count my neighbors_out which are 1 grid away from you
         size_t neighbors_out = 0;
-        for (size_t kk = 0; kk < nd1->neighbors_out.size(); ++ kk) {
-          Node * cn = nd1->neighbors_out[kk];
+        for (auto& cn: nd1->neighbors_out) {
           if (abs(dn->grid_x - cn->grid_x) + abs(dn->grid_y - cn->grid_y) == 1)
             ++ neighbors_out;
         }

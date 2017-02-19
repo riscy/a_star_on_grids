@@ -5,11 +5,7 @@ using namespace std;
 #include "algorithms.h"
 #include "graph.h"
 #include "heuristics.h"
-#include "stats.h"
 #include "node_heap.h"
-
-typedef list<Node*>::iterator list_iter;
-typedef vector<Node*>::iterator vector_iter;
 
 // These algorithms 'close' nodes by flagging them with the id of the
 // current problem being solved.  This saves us unclosing every node
@@ -21,8 +17,8 @@ inline void init_new_problem(Graph & graph, Stats & stats) {
   ++ problem_id;
   // check integer overflow; problem_ids are no longer unique, so reset.
   if (problem_id == 0) {
-    for (size_t ii = 0; ii < graph.graph_view.size(); ++ ii)
-      graph.graph_view[ii]->closed_id = 0;
+    for (auto& node: graph.graph_view)
+      node->closed_id = 0;
     problem_id = 1;
   }
 }
@@ -49,10 +45,9 @@ void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
 
   while (!open_list.empty()) {
     int fmin = INT_MAX;
-    vector_iter best_on_open_list;
+    auto best_on_open_list = open_list.begin();
     // Pop the best node off the open_list via linear scan
-    for (vector_iter node = open_list.begin();
-         node != open_list.end(); ++ node) {
+    for (auto node = open_list.begin(); node != open_list.end(); ++ node) {
       if ((*node)->f < fmin) {
         fmin = (*node)->f;
         best_on_open_list = node;
@@ -68,9 +63,7 @@ void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
     open_list.pop_back();
 
     // Add each neighbor
-    for (vector_iter ii = expand_me->neighbors_out.begin();
-         ii != expand_me->neighbors_out.end(); ++ ii) {
-      Node* add_me = *ii;
+    for (auto add_me: expand_me->neighbors_out) {
       if (add_me->closed(problem_id))
         continue;
       const int g = expand_me->g + graph.cost(expand_me, add_me);
@@ -88,8 +81,8 @@ void astar_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
   // Stats collection & cleanup
   stats.open_list_size += open_list.size();
   reconstruct_path(start, goal, graph.cost, stats);
-  for (vector_iter ii = open_list.begin(); ii != open_list.end(); ++ ii)
-    (*ii)->open = false;
+  for (auto node: open_list)
+    node->open = false;
   open_list.clear();
 }
 
@@ -113,9 +106,7 @@ void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
     node_heap::pop(open_list);
 
     // Add each neighbor
-    for (vector_iter ii = expand_me->neighbors_out.begin();
-           ii != expand_me->neighbors_out.end(); ++ ii) {
-      Node* add_me = *ii;
+    for (auto& add_me: expand_me->neighbors_out) {
       if (add_me->closed(problem_id))
         continue;
       const int g = expand_me->g + graph.cost(expand_me, add_me);
@@ -134,8 +125,8 @@ void astar_heap(Graph & graph, Node* start, Node* goal, Stats & stats,
   // Stats collection & cleanup
   stats.open_list_size += open_list.size();
   reconstruct_path(start, goal, graph.cost, stats);
-  for (vector_iter ii = open_list.begin(); ii != open_list.end(); ++ ii)
-    (*ii)->open = false;
+  for (auto& node: open_list)
+    node->open = false;
   open_list.clear();
 }
 
@@ -155,16 +146,16 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
   start->relax(0, h(start, goal), NULL);
   start->fringe_index = Fringe.begin();
   bool found = false;
-  int flimit = start->f;
+  int f_limit = start->f;
 
   while (!found && !Fringe.empty()) {
-    int fnext = INT_MAX;
-    for (list_iter ff = Fringe.begin(); ff != Fringe.end();) {
+    int next_f_limit = INT_MAX;
+    for (auto ff = Fringe.begin(); ff != Fringe.end();) {
       Node* expand_me = *ff;
       // is this node outside the current depth?
-      if (expand_me->f > flimit) {
-        if (expand_me->f < fnext)
-          fnext = expand_me->f; // track smallest next depth
+      if (expand_me->f > f_limit) {
+        if (expand_me->f < next_f_limit)
+          next_f_limit = expand_me->f; // track smallest next depth
         ++ ff;
         continue; // skip this one (for now)
       }
@@ -177,16 +168,12 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
       expand_me->expand(problem_id);
 
       // Relax the neighbors and put them on the fringe AFTER `expand_me'
-      for (vector_iter ii = expand_me->neighbors_out.begin();
-           ii != expand_me->neighbors_out.end(); ++ ii) {
-        Node* add_me = *ii;
+      for (auto& add_me: expand_me->neighbors_out) {
         if (add_me->closed(problem_id))
           continue;
         const int g = expand_me->g + graph.cost(expand_me, add_me);
 
-        list_iter insertion_point = ff;
-        ++ insertion_point;
-
+        auto insertion_point = next(ff);
         if (!add_me->open) {
           // if not already open, insert add_me after expand_me
           add_me->open = true;
@@ -204,14 +191,14 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
       ff = Fringe.erase(ff);
     }
     // Increase the depth and scan the fringe again
-    flimit = fnext;
+    f_limit = next_f_limit;
   }
 
   // Stats collection & cleanup
   stats.open_list_size += Fringe.size();
   reconstruct_path(start, goal, graph.cost, stats);
-  for (list_iter ff = Fringe.begin(); ff != Fringe.end(); ++ ff)
-    (*ff)->open = false;
+  for (auto& node: Fringe)
+    node->open = false;
   Fringe.clear();
 }
 
@@ -223,8 +210,7 @@ void lrta_basic(Graph & graph, Node* start, Node* goal, Stats & stats,
     Node* best_neighbor = 0;
     unsigned int best_f = INT_MAX;
     stats.nodes_expanded += 1;
-    for (size_t ii = 0; ii < start->neighbors_out.size(); ++ ii) {
-      Node* neighb = start->neighbors_out[ii];
+    for (auto& neighb: start->neighbors_out) {
       // set default heuristic value if it isn't set
       if (!(neighb->closed(problem_id))) {
         neighb->expand(problem_id);
