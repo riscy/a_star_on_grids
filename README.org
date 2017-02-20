@@ -94,9 +94,8 @@
       # turn what is effectively a norm in Linfty into a norm in L1 space.
 *** Choose cardinal/diagonal move costs carefully
     On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
-    the cost of a cardinal move (~C~) not only affects the appearance of the paths
-    A* generates, but also its efficiency.  (A* isn't alone in this; the [[https://en.wikipedia.org/wiki/Fringe_search][Fringe
-    Search]] algorithm is also sensitive to changes in cost structure.)
+    the cost of a cardinal move (~C~) not only affects the appearance of the
+    paths A* generates, but also its efficiency.
 ***** Avoid same-cost diagonal and cardinal moves
       When the entity can move cardinally /or/ diagonally once per time-step, the
       instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
@@ -142,8 +141,8 @@
     To help keep the open list sorted, an implementation of A* might store the
     ~f_i~ and ~g_i~ values for every open state ~i~.  And since ~f_i = g_i +
     h_i~, the value of ~h_i~ can always be recovered as ~h_i = f_i - g_i~ for
-    any open state ~i~.  Using these stored values can be less expensive than
-    computing ~h_i~ directly.
+    any open state ~i~.  Using these stored values (a form of [[https://en.wikipedia.org/wiki/Memoization][memoization]]) can
+    be less expensive than recomputing ~h_i~.
 
     For instance, suppose ~i~ is on the open list with ~f~ and ~g~ values of
     ~f_current~ and ~g_current~.  Then A* iterates to a cheaper path to ~i~ with
@@ -156,14 +155,15 @@
 *** Consider Fringe Search
     [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
     growing and maintaining the open list.  The implementation is quite similar
-    to A*.
+    to A*, and most of the points in this document also apply to Fringe Search,
+    such as choosing a good heuristic, the choice of diagonal vs. cardinal move
+    costs, and even the use of memoized heuristic values.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][example code]].)
 
-    With compiler optimizations on, Fringe Search is slower than A* -- but only
+    With compiler optimizations on, Fringe Search is slower than A*, albeit only
     if the methods in this document are applied.  But with compiler
-    optimizations off, Fringe Search is faster than A*.  Because of this, it's
-    reasonable to assume that Fringe Search might be the faster choice in
-    interpreted scripting languages, and is worth considering.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][example
-    code]].)
+    optimizations off, Fringe Search can be faster than A*.  It's reasonable to
+    /predict/ that Fringe Search might be the faster choice in interpreted
+    scripting languages...
 * Additional Resources
   - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
