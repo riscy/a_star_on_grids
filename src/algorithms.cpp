@@ -173,15 +173,15 @@ void fringe_search(Graph & graph, Node* start, Node* goal, Stats & stats,
           continue;
         const int g = expand_me->g + graph.cost(expand_me, add_me);
 
-        auto insertion_point = next(ff);
         if (!add_me->open) {
-          // if not already open, insert add_me after expand_me
           add_me->open = true;
           add_me->relax(g, h(add_me, goal), expand_me);
+          auto insertion_point = next(ff);
           add_me->fringe_index = Fringe.insert(insertion_point, add_me);
         }
         else if (g < add_me->g) {
           add_me->relax(g, add_me->f - add_me->g, expand_me);
+          auto insertion_point = next(ff);
           if (*insertion_point != add_me) {
             Fringe.erase(add_me->fringe_index);
             add_me->fringe_index = Fringe.insert(insertion_point, add_me);
