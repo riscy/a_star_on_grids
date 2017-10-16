@@ -14,15 +14,15 @@ class Node {
   vector<Node*> neighbors_out;
   vector<Node*> neighbors_in;
   int grid_x, grid_y;
-  char glyph;                   // useful for displaying ascii map
 
   // pathfinding variables
-  int g, f;                     // recorded g and f costs
-  int heap_index;               // location in the heap
-  int closed_id;
-  bool open;
+  int g, f;                           // recorded g and f costs
   Node * whence;                      // for reconstructing paths
-  list<Node*>::iterator fringe_index; // used by fringe search
+  list<Node*>::iterator fringe_index; // location in the fringe (fringe search)
+  int heap_index;                     // location in the heap (A* with a heap)
+  short closed_id;                    // problem on which this node is closed
+  bool open;                          // whether this node is on an open list
+  char glyph;                         // useful for displaying an ascii map
 
   Node();
   void expand(int problem_id);
@@ -38,7 +38,7 @@ class Graph {
   void clear();
 
   EdgeType edge_type;
-  int width, height;
+  unsigned short width, height;
   unsigned int (*cost)(Node*, Node*);
 
   vector<Node*> graph_view;

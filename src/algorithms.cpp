@@ -10,7 +10,7 @@ using namespace std;
 // These algorithms 'close' nodes by flagging them with the id of the
 // current problem being solved.  This saves us unclosing every node
 // after solving each path.
-int problem_id = 1;
+short problem_id = 1;
 
 inline void init_new_problem(Graph & graph, Stats & stats) {
   ++ stats.num_problems;
