@@ -10,25 +10,31 @@
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS: [koma,utopia,10pt,microtype,paralist]
 
-#+ATTR_LATEX: :width 0.12\textwidth
+#+begin_latex
+\begin{center}
+#+end_latex
+#+ATTR_LATEX: :width 0.25\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
+#+begin_latex
+\end{center}
+#+end_latex
 
 * Table of Contents :TOC_3_gh:noexport:
- - [[#description][Description]]
-     - [[#download-as-pdf][Download as PDF]]
-     - [[#contributing][Contributing]]
- - [[#preliminaries][Preliminaries]]
- - [[#heuristics-and-move-costs][Heuristics and move costs]]
-     - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
-     - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
-     - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
- - [[#implementing-the-open-list][Implementing the open list]]
-     - [[#use-a-binary-heap][Use a binary heap]]
-     - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
-     - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
-     - [[#consider-fringe-search][Consider Fringe Search]]
- - [[#additional-resources][Additional Resources]]
+- [[#description][Description]]
+    - [[#contributing][Contributing]]
+- [[#preliminaries][Preliminaries]]
+- [[#heuristics-and-move-costs][Heuristics and move costs]]
+    - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
+    - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
+    - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
+- [[#implementation-details][Implementation details]]
+    - [[#use-a-binary-heap][Use a binary heap]]
+    - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
+    - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
+    - [[#pack-your-data-structures][Pack your data structures]]
+    - [[#consider-fringe-search][Consider Fringe Search]]
+- [[#additional-resources][Additional Resources]]
 
 * Description
   This document describes ways to improve A*, focusing on pathfinding on four-
@@ -123,7 +129,7 @@
            retains a preference for diagonal moves over pairs of cardinal moves.
            On average this keeps the size of the open list smaller, but it can
            also increase state expansions.  Usually it is noticeably faster.
-* Implementing the open list
+* Implementation details
 *** Use a binary heap
     ...and implement the heap using an array.
 
@@ -152,6 +158,14 @@
     f_new = g_new + f_current - g_current
     #+end_src
     (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][example code]].)
+*** Pack your data structures
+    If you have a C/C++ implementation, be aware of the effects of structure
+    packing -- /especially/ if you're using an explicit graph to represent a
+    large search space.
+
+    If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
+    argument and see how much it whines about having to pad your data structures
+    with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
 *** Consider Fringe Search
     [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
     growing and maintaining the open list.  The implementation is quite similar
