@@ -3,6 +3,7 @@
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
 #+LATEX_HEADER: \usepackage[parfill]{parskip}
+#+LATEX_HEADER: \usepackage{comment}
 #+LATEX_HEADER: \usepackage{color,hyperref}
 #+LATEX_HEADER: \definecolor{darkblue}{rgb}{0.2,0.2,0.7}
 #+LATEX_HEADER: \hypersetup{colorlinks,breaklinks,linkcolor=darkblue,urlcolor=darkblue,anchorcolor=darkblue,citecolor=darkblue}
@@ -11,18 +12,18 @@
 #+LATEX_CLASS_OPTIONS: [koma,utopia,10pt,microtype,paralist]
 
 #+begin_latex
-\begin{center}
+\begin{comment}
 #+end_latex
+[[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]]
 #+ATTR_LATEX: :width 0.25\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
 #+begin_latex
-\end{center}
+\end{comment}
 #+end_latex
 
 * Table of Contents :TOC_3_gh:noexport:
 - [[#description][Description]]
-    - [[#contributing][Contributing]]
 - [[#preliminaries][Preliminaries]]
 - [[#heuristics-and-move-costs][Heuristics and move costs]]
     - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
@@ -35,6 +36,7 @@
     - [[#pack-your-data-structures][Pack your data structures]]
     - [[#consider-fringe-search][Consider Fringe Search]]
 - [[#additional-resources][Additional Resources]]
+- [[#contributing][Contributing]]
 
 * Description
   This document describes ways to improve A*, focusing on pathfinding on four-
@@ -42,11 +44,6 @@
   ways to make an existing implementation a bit faster.
 
   Some accompanying [[https://github.com/riscy/a_star_on_grids/tree/master/src][example code]] is available in C++.
-*** Download as PDF                                                :noexport:
-    This document is available for download in [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][PDF]].
-*** Contributing
-    If you have any corrections or contributions -- both much appreciated --
-    feel free to get in touch or simply make a pull request.
 * Preliminaries
   Forgoing a complete description, recall that A* is essentially a loop that
   expands a list of /open/ states that reach toward a goal state.  Each
@@ -189,3 +186,6 @@
        extremely novel ways to use these mappings to control game entities.
   - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Amit Patel's variants of A*]] :: A listing of some alternatives to A*.
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
+* Contributing
+  If you have any corrections or contributions -- both much appreciated --
+  feel free to get in touch or simply make a pull request.
