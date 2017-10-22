@@ -8,6 +8,7 @@ int diagonal_minus_cardinal = diagonal_cost - cardinal_cost;
 int two_cardinal_minus_diagonal = 2 * cardinal_cost - diagonal_cost;
 int half_two_cardinal_minus_diagonal = cardinal_cost - diagonal_cost / 2;
 int half_diagonal = diagonal_cost / 2;
+int weighted_heuristic_scale = 10;
 
 // Costs.........................................................................
 
@@ -68,4 +69,8 @@ unsigned int octile_heuristic_no_branch(Node* n1, Node* n2) {
   int dy = abs(n1->grid_y - n2->grid_y);
   //return (half_two_cardinal_minus_diagonal * abs(dx - dy) + half_diagonal * (dx + dy));
   return (two_cardinal_minus_diagonal * abs(dx - dy) + diagonal_cost * (dx + dy)) / 2;
+}
+
+unsigned int weighted_octile_heuristic(Node* n1, Node* n2) {
+  return octile_heuristic(n1, n2) * weighted_heuristic_scale;
 }

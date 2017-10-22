@@ -15,5 +15,6 @@ unsigned int man_heuristic(Node*, Node*);
 unsigned int inf_heuristic(Node*, Node*);
 unsigned int octile_heuristic(Node*, Node*);
 unsigned int octile_heuristic_no_branch(Node*, Node*);
+unsigned int weighted_octile_heuristic(Node*, Node*);
 
 #endif // HEURISTICS_H

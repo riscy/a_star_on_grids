@@ -28,6 +28,7 @@
 - [[#heuristics-and-move-costs][Heuristics and move costs]]
     - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
     - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
+    - [[#scale-your-heuristics-up][Scale your heuristics up]]
     - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
 - [[#implementation-details][Implementation details]]
     - [[#use-a-binary-heap][Use a binary heap]]
@@ -85,7 +86,7 @@
       where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
       being the cost to take a diagonal move.
 
-      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L58][example implementation of the octile heuristic]].)
+      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]].)
 ***** Non-branching octile heuristic
       Note the octile heuristic can be written without a conditional (albeit with
       an absolute value), which may help improve instruction level parallelism:
@@ -95,9 +96,16 @@
       where ~E = 2 * C - D~.  You can see how this simplifies further, without
       floating point arithmetic, if ~D~ (and therefore ~E~) is even.
 
-      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L66][example implementation of the non-branching octile heuristic]].)
+      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]].)
       # A proof for this relies on using a 45-degree rotation matrix to
       # turn what is effectively a norm in Linfty into a norm in L1 space.
+*** Scale your heuristics up
+    If you can accept small suboptimalities in your paths, multiply all of your
+    heuristic values by a constant ~K > 1~.  This simple change gives rise to an
+    algorithm called Weighted A* which can dramatically improve performance but
+    won't degrade paths too much -- especially on grid worlds.
+
+    (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].)
 *** Choose cardinal/diagonal move costs carefully
     On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
     the cost of a cardinal move (~C~) not only affects the appearance of the
