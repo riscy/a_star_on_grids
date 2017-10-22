@@ -84,15 +84,18 @@
       #+end_src
       where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
       being the cost to take a diagonal move.
-      (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L58][example code]].)
 
+      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L58][example implementation of the octile heuristic]].)
+***** Non-branching octile heuristic
       Note the octile heuristic can be written without a conditional (albeit with
       an absolute value), which may help improve instruction level parallelism:
       #+begin_src ruby
       h_i = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
       #+end_src
       where ~E = 2 * C - D~.  You can see how this simplifies further, without
-      floating point arithmetic, if both ~D~ and ~E~ are even.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L66][example code]].)
+      floating point arithmetic, if ~D~ (and therefore ~E~) is even.
+
+      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L66][example implementation of the non-branching octile heuristic]].)
       # A proof for this relies on using a 45-degree rotation matrix to
       # turn what is effectively a norm in Linfty into a norm in L1 space.
 *** Choose cardinal/diagonal move costs carefully
@@ -133,13 +136,17 @@
     This is enormously important on large grids, but admittedly less important
     for small grids -- on the order of a couple thousand states in optimized
     C++.  On grids with few obstacles, maintaining the heap might be more
-    expensive than linear scans of the open list.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example code]].)
+    expensive than linear scans of the open list.
+
+    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]].
 *** Break ties in favor of path depth
     It is common for more than one state on the open list to have the lowest ~f~
     cost.  When this is the case it's better to make A* focus on deep solutions
-    rather than a breadth of shallow solutions by tie-breaking on larger ~g~
-    values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video that
-    demonstrates this]].  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example code]].)
+    rather than a breadth of shallow solutions by tie-breaking in favor of
+    larger ~g~ values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video
+    that demonstrates this]].
+
+    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
 *** Avoid recomputing heuristics
     To help keep the open list sorted, an implementation of A* might store the
     ~f_i~ and ~g_i~ values for every open state ~i~.  And since ~f_i = g_i +
@@ -154,7 +161,8 @@
     #+begin_src ruby
     f_new = g_new + f_current - g_current
     #+end_src
-    (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][example code]].)
+
+    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
 *** Pack your data structures
     If you have a C/C++ implementation, be aware of the effects of structure
     packing -- /especially/ if you're using an explicit graph to represent a
@@ -166,9 +174,11 @@
 *** Consider Fringe Search
     [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
     growing and maintaining the open list.  The implementation is quite similar
-    to A*, and most of the points in this document also apply to Fringe Search,
-    such as choosing a good heuristic, the choice of diagonal vs. cardinal move
-    costs, and even the use of memoized heuristic values.  (See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][example code]].)
+    to A*, and just about all of the points in this document apply to Fringe
+    Search, such as choosing a good heuristic, the choice of diagonal
+    vs. cardinal move costs, and using memoized heuristic values.
+
+    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
 
     With compiler optimizations on, Fringe Search is slower than A*, albeit only
     if the methods in this document are applied.  But with compiler
