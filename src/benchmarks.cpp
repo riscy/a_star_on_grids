@@ -72,19 +72,12 @@ void benchmark_grid_costs() {
   graph.load_ascii_map("../maps/example.map", EDGES_OCTILE);
   benchmark_all_algorithms(graph, 100, &octile_heuristic); // warm the cache
 
-  cout << endl << "Diagonal: 99/Cardinal: 70" << endl;
-  grid_costs(70, 99); // set the cardinal/diagonal movement costs
-  benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
+  int test_costs[4][2] = {{70, 99}, {2, 3}, {50, 99}, {1, 1}};
+  for (size_t ii = 0; ii < 4; ++ ii) {
+    cout << endl << "Diagonal: " << test_costs[ii][0]
+         << "/Cardinal: " << test_costs[ii][1] << endl;
+    grid_costs(test_costs[ii][0], test_costs[ii][1]);
+    benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
+  }
 
-  cout << endl << "Diagonal: 3/Cardinal: 2" << endl;
-  grid_costs(2, 3); // set the cardinal/diagonal movement costs
-  benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
-
-  cout << endl << "Diagonal: 99/Cardinal: 50" << endl;
-  grid_costs(50, 99); // set the cardinal/diagonal movement costs
-  benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
-
-  cout << endl << "Diagonal: 1/Cardinal: 1" << endl;
-  grid_costs(1, 1); // set the cardinal/diagonal movement costs
-  benchmark_all_algorithms(graph, num_problems, &octile_heuristic, true);
 }
