@@ -28,8 +28,8 @@
 - [[#heuristics-and-move-costs][Heuristics and move costs]]
     - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
     - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
-    - [[#scale-your-heuristics-up][Scale your heuristics up]]
     - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
+    - [[#scale-your-heuristics-up][Scale your heuristics up]]
 - [[#implementation-details][Implementation details]]
     - [[#use-a-binary-heap][Use a binary heap]]
     - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
@@ -99,13 +99,6 @@
       (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]].)
       # A proof for this relies on using a 45-degree rotation matrix to
       # turn what is effectively a norm in Linfty into a norm in L1 space.
-*** Scale your heuristics up
-    If you can accept small suboptimalities in your paths, multiply all of your
-    heuristic values by a constant ~K > 1~.  This simple change gives rise to an
-    algorithm called Weighted A* which can dramatically improve performance but
-    won't degrade paths too much -- especially on grid worlds.
-
-    (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].)
 *** Choose cardinal/diagonal move costs carefully
     On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
     the cost of a cardinal move (~C~) not only affects the appearance of the
@@ -137,6 +130,12 @@
            retains a preference for diagonal moves over pairs of cardinal moves.
            On average this keeps the size of the open list smaller, but it can
            also increase state expansions.  Usually it is noticeably faster.
+*** Scale your heuristics up
+    Multiply all heuristics by a constant ~K > 1~.  This simple change yields an
+    algorithm called Weighted A*, which significantly improves run-time -- at
+    the cost of small suboptimalities in your paths.
+
+    (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].)
 * Implementation details
 *** Use a binary heap
     ...and implement the heap using an array.
