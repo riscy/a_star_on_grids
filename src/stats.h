@@ -28,6 +28,10 @@ class Stats {
     start_time = clock();
   }
 
+  inline double total_time() {
+    return (clock() - start_time) / (double) CLOCKS_PER_SEC;
+  }
+
   void print() {
     if (this->label.size())
       cout << this->label << ":" << endl;
@@ -36,7 +40,7 @@ class Stats {
     cout << " Mean path length: " << path_length / num_problems << endl;
     cout << " Mean path cost: " << path_cost / num_problems << endl;
     cout << " Mean open list size: " << open_list_size / num_problems << endl;
-    cout << " Total time (sec): " << (clock() - start_time) / (float) CLOCKS_PER_SEC << endl;
+    cout << " Total time (sec): " << total_time() << endl;
   }
 };
 
