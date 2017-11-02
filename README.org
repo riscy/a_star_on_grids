@@ -102,7 +102,7 @@
 *** Choose cardinal/diagonal move costs carefully
     On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
     the cost of a cardinal move (~C~) not only affects the appearance of the
-    paths A* generates, but also its efficiency.
+    paths A* generates, but can also affect its efficiency.
 ***** Avoid same-cost diagonal and cardinal moves
       When the entity can move cardinally /or/ diagonally once per time-step, the
       instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
@@ -171,9 +171,9 @@
 
     See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
 *** Pack your data structures
-    If you have a C/C++ implementation, be aware of the effects of structure
-    packing -- /especially/ if you're using an explicit graph to represent a
-    large search space.
+    If you're coding in a low-level language like C, C++, or Rust, be aware of
+    the effects of structure packing -- /especially/ if you're using an explicit
+    graph to represent a large search space.
 
     If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
     argument and see how much it whines about having to pad your data structures
