@@ -193,7 +193,7 @@
     /predict/ that Fringe Search might be the faster choice in interpreted
     scripting languages...
 * Additional Resources
-  - [[http://www.policyalmanac.org/games/aStarTutorial.htm][Patrick Lester's A* for beginners]] :: A good starting point.
+  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
        videos covering fundamental and advanced topics.
   - [[http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps][Dijkstra Maps]] :: Dijkstra Maps have also been called "differential
@@ -202,7 +202,6 @@
        Heuristics]] (Rayner, Sturtevant, Bowling) but this article describes some
        extremely novel ways to use these mappings to control game entities.
   - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Amit Patel's variants of A*]] :: A listing of some alternatives to A*.
-  - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
 * Contributing
   If you have any corrections or contributions -- both much appreciated --
   feel free to get in touch or simply make a pull request.
