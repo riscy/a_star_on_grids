@@ -36,8 +36,8 @@
     - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
     - [[#pack-your-data-structures][Pack your data structures]]
     - [[#consider-fringe-search][Consider Fringe Search]]
-- [[#additional-resources][Additional Resources]]
-- [[#contributing][Contributing]]
+- [[#additional-resources][Additional resources]]
+- [[#contributing-and-citing][Contributing and citing]]
 
 * Description
   This document describes ways to improve A*, focusing on pathfinding on four-
@@ -192,7 +192,7 @@
     optimizations off, Fringe Search can be faster than A*.  It's reasonable to
     /predict/ that Fringe Search might be the faster choice in interpreted
     scripting languages...
-* Additional Resources
+* Additional resources
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
        videos covering fundamental and advanced topics.
@@ -202,6 +202,16 @@
        Heuristics]] (Rayner, Sturtevant, Bowling) but this article describes some
        extremely novel ways to use these mappings to control game entities.
   - [[http://theory.stanford.edu/~amitp/GameProgramming/Variations.html][Amit Patel's variants of A*]] :: A listing of some alternatives to A*.
-* Contributing
+* Contributing and citing
   If you have any corrections or contributions -- both much appreciated --
   feel free to get in touch or simply make a pull request.
+
+  If for any reason you want to cite this document, use the following:
+  #+begin_src bibtex
+  @TECHREPORT{Rayner2017BestPracticesGrids,
+      author = {D. Chris Rayner},
+      title = {Best practices for A\* on grids},
+      institution = {},
+      year = {2017}
+  }
+  #+end_src
