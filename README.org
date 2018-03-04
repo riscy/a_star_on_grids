@@ -25,14 +25,15 @@
 * Table of Contents :TOC_3_gh:noexport:
 - [[#description][Description]]
 - [[#preliminaries][Preliminaries]]
-- [[#heuristics-and-move-costs][Heuristics and move costs]]
+- [[#move-costs][Move costs]]
   - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
+  - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
+  - [[#validate-your-move-costs][Validate your move costs]]
+  - [[#use-high-performing-move-costs][Use high-performing move costs]]
+- [[#heuristics][Heuristics]]
   - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
   - [[#use-manhattan-distance-on-a-4-connected-grid][Use Manhattan distance on a 4-connected grid]]
   - [[#use-octile-distance-on-an-8-connected-grid][Use octile distance on an 8-connected grid]]
-  - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
-  - [[#ensure-c--d--2c][Ensure C < D < 2C]]
-  - [[#use-high-performing-move-costs][Use high-performing move costs]]
   - [[#scale-your-heuristics-up][Scale your heuristics up]]
 - [[#implementation-details][Implementation details]]
   - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
@@ -64,17 +65,48 @@
   estimate/ for the cost to get from ~i~ to the goal.
 
   (For further detail, visit the resources at the end of the document.)
-* Heuristics and move costs
+* Move costs
+   On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
+   the cost of a cardinal move (~C~) not only affects the appearance of the
+   paths A* generates, but can also affect its efficiency.
 ** Avoid floating point arithmetic
    Prefer integral data types wherever possible.  This is not only faster but
    helps to avoid the numerical imprecision that can confuse debugging attempts.
+** Avoid same-cost diagonal and cardinal moves
+   When the entity can move cardinally /or/ diagonally once per time-step, the
+   instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
+   ~C = D = 1~).  While technically true, this increases the number of unique
+   optimal paths across the grid; A* is more efficient when it has fewer
+   options.
+** Validate your move costs
+   ~Ensure C < D < 2C~.  If a diagonal move costs /less/ than a cardinal move,
+   A* prefers zigzagging paths.  If a diagonal move costs more than /two/
+   cardinal moves, A* prefers rectilinear paths like you'd see on a 4-connected
+   grid.  Paths tend to look best when the costs lie between these two extremes.
+** Use high-performing move costs
+   The following cost structures work well in practice.  Results can vary
+   depending on the obstacles in the grid, so test before using.
+   - ~D = 99~, ~C = 70~ :: If you prefer a diagonal move to cost ~sqrt(2)~
+        relative to a cardinal move, try ~D = 99~ and ~C = 70~.  This close
+        approximation helps to avoid floating point arithmetic.
+   - ~D = 3~, ~C = 2~ :: This is still close to a ~D/C~ ratio of ~sqrt(2)~ and
+        remains integral.  Moreover, if ~h_i~ is admissible but non-integral
+        for whatever reason, then its [[https://en.wikipedia.org/wiki/Floor_and_ceiling_functions][ceiling]] is admissible and can be used
+        instead.  Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean
+        Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made a
+        noticeable difference.
+   - ~D = 99~, ~C = 50~ :: This gives something close to rectilinear costs but
+        retains a preference for diagonal moves over pairs of cardinal moves.
+        On average this keeps the size of the open list smaller, but it can
+        also increase state expansions.  Usually it is noticeably faster.
+* Heuristics
 ** Use a non-overestimating heuristic
    Heuristics that don't overestimate are called /admissible/.  A* recovers an
    optimal (cheapest) path when its heuristic is admissible.  A good, admissible
    grid heuristic is the "distance" between two states assuming no obstacles.
 ** Use Manhattan distance on a 4-connected grid
    The distance between two states on a 4-connected grid, assuming no
-   obstacles, is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
+   obstacles, is the *Manhattan* (or *L1-norm* or *rectilinear*) distance:
    #+begin_src ruby
    h_i = C * (Δx + Δy)
    #+end_src
@@ -102,37 +134,6 @@
 
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
-** Avoid same-cost diagonal and cardinal moves
-   On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
-   the cost of a cardinal move (~C~) not only affects the appearance of the
-   paths A* generates, but can also affect its efficiency.
-
-   For instance, when the entity can move cardinally /or/ diagonally once per
-   time-step, the instinct is to tell A* that cardinal and diagonal moves cost
-   the same (e.g., ~C = D = 1~).  While technically true, this increases the
-   number of unique optimal paths across the grid; A* is more efficient when it
-   has fewer options.
-** Ensure C < D < 2C
-   If a diagonal move costs /less/ than a cardinal move, A* prefers zigzagging
-   paths.  If a diagonal move costs more than /two/ cardinal moves, A* prefers
-   rectilinear paths like you'd see on a 4-connected grid.  Paths tend to look
-   best when the costs lie between these two extremes.
-** Use high-performing move costs
-   The following cost structures work well in practice.  Results can vary
-   depending on the obstacles in the grid, so test before using.
-   - ~D = 99~, ~C = 70~ :: If you prefer a diagonal move to cost ~sqrt(2)~
-        relative to a cardinal move, try ~D = 99~ and ~C = 70~.  This close
-        approximation helps to avoid floating point arithmetic.
-   - ~D = 3~, ~C = 2~ :: This is still close to a ~D/C~ ratio of ~sqrt(2)~ and
-        remains integral.  Moreover, if ~h_i~ is admissible but non-integral
-        for whatever reason, then its [[https://en.wikipedia.org/wiki/Floor_and_ceiling_functions][ceiling]] is admissible and can be used
-        instead.  Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean
-        Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made a
-        noticeable difference.
-   - ~D = 99~, ~C = 50~ :: This gives something close to rectilinear costs but
-        retains a preference for diagonal moves over pairs of cardinal moves.
-        On average this keeps the size of the open list smaller, but it can
-        also increase state expansions.  Usually it is noticeably faster.
 ** Scale your heuristics up
    Multiply all heuristics by a constant ~K > 1~.  This simple change yields an
    algorithm called Weighted A*, which significantly improves run-time -- at
