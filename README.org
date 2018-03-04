@@ -31,7 +31,7 @@
     - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
     - [[#scale-your-heuristics-up][Scale your heuristics up]]
 - [[#implementation-details][Implementation details]]
-    - [[#use-a-binary-heap][Use a binary heap]]
+    - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
     - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
     - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
     - [[#pack-your-data-structures][Pack your data structures]]
@@ -137,15 +137,18 @@
 
     (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].)
 * Implementation details
-*** Use a binary heap
-    ...and implement the heap using an array.
+*** Know whether to use a heap
+    On larger grids with complex obstacles, implementing your open list as a
+    binary heap (preferably on top of an array) can lead to dramatic performance
+    gains.  This is why it's generally considered a best practice to do so.
 
-    This is enormously important on large grids, but admittedly less important
-    for small grids -- on the order of a couple thousand states in optimized
-    C++.  On grids with few obstacles, maintaining the heap might be more
-    expensive than linear scans of the open list.
+    But heaps can hurt you on smaller grids with few obstacles.  A linear scan
+    of the entire array can be much faster, especially if your implementation is
+    written in a low-level language like C++.
 
-    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]].
+    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
+    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
+    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]].
 *** Break ties in favor of path depth
     It is common for more than one state on the open list to have the lowest ~f~
     cost.  When this is the case it's better to make A* focus on deep solutions
