@@ -14,7 +14,7 @@
 #+begin_latex
 \begin{comment}
 #+end_latex
-[[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20171115-blue.svg]]
+[[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180304-blue.svg]]
 #+ATTR_LATEX: :width 0.25\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
