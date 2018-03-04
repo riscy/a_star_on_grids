@@ -86,7 +86,7 @@
       where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
       being the cost to take a diagonal move.
 
-      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]].)
+      See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]].
 ***** Non-branching octile heuristic
       Note the octile heuristic can be written without a conditional (albeit with
       an absolute value), which may help improve instruction level parallelism:
@@ -96,7 +96,7 @@
       where ~E = 2 * C - D~.  You can see how this simplifies further, without
       floating point arithmetic, if ~D~ (and therefore ~E~) is even.
 
-      (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]].)
+      See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]].
       # A proof for this relies on using a 45-degree rotation matrix to
       # turn what is effectively a norm in Linfty into a norm in L1 space.
 *** Choose cardinal/diagonal move costs carefully
@@ -135,7 +135,7 @@
     algorithm called Weighted A*, which significantly improves run-time -- at
     the cost of small suboptimalities in your paths.
 
-    (See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].)
+    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
 * Implementation details
 *** Know whether to use a heap
     On larger grids with complex obstacles, implementing your open list as a
@@ -148,7 +148,7 @@
 
     - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
     - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]].
+    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
 *** Break ties in favor of path depth
     It is common for more than one state on the open list to have the lowest ~f~
     cost.  When this is the case it's better to make A* focus on deep solutions
