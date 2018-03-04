@@ -40,9 +40,9 @@
 - [[#contributing-and-citing][Contributing and citing]]
 
 * Description
-  This document describes ways to improve A*, focusing on pathfinding on four-
-  and eight-connected grids.  It's pitched at hobbyists and anyone looking for
-  ways to make an existing implementation a bit faster.
+  This document describes ways to improve an A* implementation, focusing on
+  pathfinding in four- and eight-connected grids.  It's pitched at hobbyists and
+  anyone looking for ways to make existing code a bit faster.
 
   Some accompanying [[https://github.com/riscy/a_star_on_grids/tree/master/src][example code]] is available in C++.
 * Preliminaries
