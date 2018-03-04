@@ -183,18 +183,18 @@
     with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
 *** Consider Fringe Search
     [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
-    growing and maintaining the open list.  The implementation is quite similar
-    to A*, and just about all of the points in this document apply to Fringe
-    Search, such as choosing a good heuristic, the choice of diagonal
-    vs. cardinal move costs, and using memoized heuristic values.
+    growing and maintaining the open list.  Just about all of the points in this
+    document apply to Fringe Search, such as choosing a good heuristic, the
+    choice of diagonal vs. cardinal move costs, and using memoized heuristic
+    values.
 
-    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
-
-    With compiler optimizations on, Fringe Search is slower than A*, albeit only
-    if the methods in this document are applied.  But with compiler
+    With compiler optimizations on, I found Fringe Search to be slower than A*,
+    albeit only if the methods in this document are applied.  But with compiler
     optimizations off, Fringe Search can be faster than A*.  It's reasonable to
     /predict/ that Fringe Search might be the faster choice in interpreted
     scripting languages...
+
+    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
 * Additional resources
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
