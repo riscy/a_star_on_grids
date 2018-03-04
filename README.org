@@ -26,18 +26,21 @@
 - [[#description][Description]]
 - [[#preliminaries][Preliminaries]]
 - [[#heuristics-and-move-costs][Heuristics and move costs]]
-    - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
-    - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
-    - [[#use-manhattan-distance-on-a-4-connected-grid][Use Manhattan distance on a 4-connected grid]]
-    - [[#use-octile-distance-on-an-8-connected-grid][Use octile distance on an 8-connected grid]]
-    - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
-    - [[#scale-your-heuristics-up][Scale your heuristics up]]
+  - [[#avoid-floating-point-arithmetic][Avoid floating point arithmetic]]
+  - [[#use-a-non-overestimating-heuristic][Use a non-overestimating heuristic]]
+  - [[#use-manhattan-distance-on-a-4-connected-grid][Use Manhattan distance on a 4-connected grid]]
+  - [[#use-octile-distance-on-an-8-connected-grid][Use octile distance on an 8-connected grid]]
+  - [[#choose-cardinaldiagonal-move-costs-carefully][Choose cardinal/diagonal move costs carefully]]
+    - [[#avoid-same-cost-diagonal-and-cardinal-moves][Avoid same-cost diagonal and cardinal moves]]
+    - [[#ensure-c--d--2c][Ensure C < D < 2C]]
+    - [[#use-high-performing-move-costs][Use high-performing move costs]]
+  - [[#scale-your-heuristics-up][Scale your heuristics up]]
 - [[#implementation-details][Implementation details]]
-    - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
-    - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
-    - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
-    - [[#pack-your-data-structures][Pack your data structures]]
-    - [[#consider-fringe-search][Consider Fringe Search]]
+  - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
+  - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
+  - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
+  - [[#pack-your-data-structures][Pack your data structures]]
+  - [[#consider-fringe-search][Consider Fringe Search]]
 - [[#additional-resources][Additional resources]]
 - [[#contributing-and-citing][Contributing and citing]]
 
@@ -63,139 +66,139 @@
 
   (For further detail, visit the resources at the end of the document.)
 * Heuristics and move costs
-*** Avoid floating point arithmetic
-    Prefer integral data types wherever possible.  This is not only faster but
-    helps to avoid the numerical imprecision that can confuse debugging attempts.
-*** Use a non-overestimating heuristic
-    Heuristics that don't overestimate are called /admissible/.  A* recovers an
-    optimal (cheapest) path when its heuristic is admissible.  A good, admissible
-    grid heuristic is the "distance" between two states assuming no obstacles.
-*** Use Manhattan distance on a 4-connected grid
-    The distance between two states on a 4-connected grid, assuming no
-    obstacles, is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
-    #+begin_src ruby
-    h_i = C * (Δx + Δy)
-    #+end_src
-    where ~Δx~ and ~Δy~ are absolute distances between ~i~ and the goal along
-    the ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move, which may
-    as well be ~1~.
-*** Use octile distance on an 8-connected grid
-    When pathfinding on an 8-connected grid, use the *octile* heuristic:
-    #+begin_src ruby
-    h_i = C * Δx + B * Δy   if Δx > Δy
-          C * Δy + B * Δx   else
-    #+end_src
-    where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
-    being the cost to take a diagonal move.
+** Avoid floating point arithmetic
+   Prefer integral data types wherever possible.  This is not only faster but
+   helps to avoid the numerical imprecision that can confuse debugging attempts.
+** Use a non-overestimating heuristic
+   Heuristics that don't overestimate are called /admissible/.  A* recovers an
+   optimal (cheapest) path when its heuristic is admissible.  A good, admissible
+   grid heuristic is the "distance" between two states assuming no obstacles.
+** Use Manhattan distance on a 4-connected grid
+   The distance between two states on a 4-connected grid, assuming no
+   obstacles, is the *rectilinear* (or *L1-norm* or *Manhattan*) distance:
+   #+begin_src ruby
+   h_i = C * (Δx + Δy)
+   #+end_src
+   where ~Δx~ and ~Δy~ are absolute distances between ~i~ and the goal along
+   the ~x~ and ~y~ axes and ~C~ is the cost to take a cardinal move, which may
+   as well be ~1~.
+** Use octile distance on an 8-connected grid
+   When pathfinding on an 8-connected grid, use the *octile* heuristic:
+   #+begin_src ruby
+   h_i = C * Δx + B * Δy   if Δx > Δy
+         C * Δy + B * Δx   else
+   #+end_src
+   where ~B = D - C~ with ~C~ being the cost to take a cardinal move and ~D~
+   being the cost to take a diagonal move.
 
-    Note the octile heuristic can be written without a conditional (albeit with
-    an absolute value), which may help improve instruction level parallelism:
-    #+begin_src ruby
-    h_i = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
-    #+end_src
-    where ~E = 2 * C - D~.  You can see how this simplifies further, without
-    floating point arithmetic, if ~D~ (and therefore ~E~) is even.
-    # A proof for this relies on using a 45-degree rotation matrix to
-    # turn what is effectively a norm in Linfty into a norm in L1 space.
+   Note the octile heuristic can be written without a conditional (albeit with
+   an absolute value), which may help improve instruction level parallelism:
+   #+begin_src ruby
+   h_i = (E * abs(Δx - Δy) + D * (Δx + Δy)) / 2
+   #+end_src
+   where ~E = 2 * C - D~.  You can see how this simplifies further, without
+   floating point arithmetic, if ~D~ (and therefore ~E~) is even.
+   # A proof for this relies on using a 45-degree rotation matrix to
+   # turn what is effectively a norm in Linfty into a norm in L1 space.
 
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
-*** Choose cardinal/diagonal move costs carefully
-    On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
-    the cost of a cardinal move (~C~) not only affects the appearance of the
-    paths A* generates, but can also affect its efficiency.
-***** Avoid same-cost diagonal and cardinal moves
-      When the entity can move cardinally /or/ diagonally once per time-step, the
-      instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
-      ~C = D = 1~).  While technically true, this increases the number of unique
-      optimal paths across the grid; A* is more efficient when it has fewer
-      options.
-***** Ensure C < D < 2C
-      If a diagonal move costs /less/ than a cardinal move, A* prefers zigzagging
-      paths.  If a diagonal move costs more than /two/ cardinal moves, A* prefers
-      rectilinear paths like you'd see on a 4-connected grid.  Paths tend to look
-      best when the costs lie between these two extremes.
-***** Use high-performing move costs
-      The following cost structures work well in practice.  Results can vary
-      depending on the obstacles in the grid, so test before using.
-      - ~D = 99~, ~C = 70~ :: If you prefer a diagonal move to cost ~sqrt(2)~
-           relative to a cardinal move, try ~D = 99~ and ~C = 70~.  This close
-           approximation helps to avoid floating point arithmetic.
-      - ~D = 3~, ~C = 2~ :: This is still close to a ~D/C~ ratio of ~sqrt(2)~ and
-           remains integral.  Moreover, if ~h_i~ is admissible but non-integral
-           for whatever reason, then its [[https://en.wikipedia.org/wiki/Floor_and_ceiling_functions][ceiling]] is admissible and can be used
-           instead.  Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean
-           Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made a
-           noticeable difference.
-      - ~D = 99~, ~C = 50~ :: This gives something close to rectilinear costs but
-           retains a preference for diagonal moves over pairs of cardinal moves.
-           On average this keeps the size of the open list smaller, but it can
-           also increase state expansions.  Usually it is noticeably faster.
-*** Scale your heuristics up
-    Multiply all heuristics by a constant ~K > 1~.  This simple change yields an
-    algorithm called Weighted A*, which significantly improves run-time -- at
-    the cost of small suboptimalities in your paths.
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
+** Choose cardinal/diagonal move costs carefully
+   On an 8-connected grid, the cost of a single diagonal move (~D~) relative to
+   the cost of a cardinal move (~C~) not only affects the appearance of the
+   paths A* generates, but can also affect its efficiency.
+*** Avoid same-cost diagonal and cardinal moves
+    When the entity can move cardinally /or/ diagonally once per time-step, the
+    instinct is to tell A* that cardinal and diagonal moves cost the same (e.g.,
+    ~C = D = 1~).  While technically true, this increases the number of unique
+    optimal paths across the grid; A* is more efficient when it has fewer
+    options.
+*** Ensure C < D < 2C
+    If a diagonal move costs /less/ than a cardinal move, A* prefers zigzagging
+    paths.  If a diagonal move costs more than /two/ cardinal moves, A* prefers
+    rectilinear paths like you'd see on a 4-connected grid.  Paths tend to look
+    best when the costs lie between these two extremes.
+*** Use high-performing move costs
+    The following cost structures work well in practice.  Results can vary
+    depending on the obstacles in the grid, so test before using.
+    - ~D = 99~, ~C = 70~ :: If you prefer a diagonal move to cost ~sqrt(2)~
+         relative to a cardinal move, try ~D = 99~ and ~C = 70~.  This close
+         approximation helps to avoid floating point arithmetic.
+    - ~D = 3~, ~C = 2~ :: This is still close to a ~D/C~ ratio of ~sqrt(2)~ and
+         remains integral.  Moreover, if ~h_i~ is admissible but non-integral
+         for whatever reason, then its [[https://en.wikipedia.org/wiki/Floor_and_ceiling_functions][ceiling]] is admissible and can be used
+         instead.  Nathan Sturtevant showed me this when we wrote [[http://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewFile/3594/3821][Euclidean
+         Heuristic Optimization]] (Rayner, Bowling, Sturtevant), and it made a
+         noticeable difference.
+    - ~D = 99~, ~C = 50~ :: This gives something close to rectilinear costs but
+         retains a preference for diagonal moves over pairs of cardinal moves.
+         On average this keeps the size of the open list smaller, but it can
+         also increase state expansions.  Usually it is noticeably faster.
+** Scale your heuristics up
+   Multiply all heuristics by a constant ~K > 1~.  This simple change yields an
+   algorithm called Weighted A*, which significantly improves run-time -- at
+   the cost of small suboptimalities in your paths.
 
-    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
+   See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
 * Implementation details
-*** Know whether to use a heap
-    On larger grids with complex obstacles, implementing your open list as a
-    binary heap (preferably on top of an array) can lead to dramatic performance
-    gains.  This is why it's generally considered a best practice to do so.
+** Know whether to use a heap
+   On larger grids with complex obstacles, implementing your open list as a
+   binary heap (preferably on top of an array) can lead to dramatic performance
+   gains.  This is why it's generally considered a best practice to do so.
 
-    But heaps can hurt you on smaller grids with few obstacles.  A linear scan
-    of the entire array can be much faster, especially if your implementation is
-    written in a low-level language like C++.
+   But heaps can hurt you on smaller grids with few obstacles.  A linear scan
+   of the entire array can be much faster, especially if your implementation is
+   written in a low-level language like C++.
 
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
-    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
-*** Break ties in favor of path depth
-    It is common for more than one state on the open list to have the lowest ~f~
-    cost.  When this is the case it's better to make A* focus on deep solutions
-    rather than a breadth of shallow solutions by tie-breaking in favor of
-    larger ~g~ values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video
-    that demonstrates this]].
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
+** Break ties in favor of path depth
+   It is common for more than one state on the open list to have the lowest ~f~
+   cost.  When this is the case it's better to make A* focus on deep solutions
+   rather than a breadth of shallow solutions by tie-breaking in favor of
+   larger ~g~ values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video
+   that demonstrates this]].
 
-    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
-*** Avoid recomputing heuristics
-    To help keep the open list sorted, an implementation of A* might store the
-    ~f_i~ and ~g_i~ values for every open state ~i~.  And since ~f_i = g_i +
-    h_i~, the value of ~h_i~ can always be recovered as ~h_i = f_i - g_i~ for
-    any open state ~i~.  Using these stored values (a form of [[https://en.wikipedia.org/wiki/Memoization][memoization]]) can
-    be less expensive than recomputing ~h_i~.
+   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
+** Avoid recomputing heuristics
+   To help keep the open list sorted, an implementation of A* might store the
+   ~f_i~ and ~g_i~ values for every open state ~i~.  And since ~f_i = g_i +
+   h_i~, the value of ~h_i~ can always be recovered as ~h_i = f_i - g_i~ for
+   any open state ~i~.  Using these stored values (a form of [[https://en.wikipedia.org/wiki/Memoization][memoization]]) can
+   be less expensive than recomputing ~h_i~.
 
-    For instance, suppose ~i~ is on the open list with ~f~ and ~g~ values of
-    ~f_current~ and ~g_current~.  Then A* iterates to a cheaper path to ~i~ with
-    a cost of ~g_new~.  The corresponding value ~f_new~ can be determined
-    /without/ making another call to the heuristic function:
-    #+begin_src ruby
-    f_new = g_new + f_current - g_current
-    #+end_src
+   For instance, suppose ~i~ is on the open list with ~f~ and ~g~ values of
+   ~f_current~ and ~g_current~.  Then A* iterates to a cheaper path to ~i~ with
+   a cost of ~g_new~.  The corresponding value ~f_new~ can be determined
+   /without/ making another call to the heuristic function:
+   #+begin_src ruby
+   f_new = g_new + f_current - g_current
+   #+end_src
 
-    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
-*** Pack your data structures
-    If you're coding in a low-level language like C, C++, or Rust, be aware of
-    the effects of structure packing -- /especially/ if you're using an explicit
-    graph to represent a large search space.
+   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
+** Pack your data structures
+   If you're coding in a low-level language like C, C++, or Rust, be aware of
+   the effects of structure packing -- /especially/ if you're using an explicit
+   graph to represent a large search space.
 
-    If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
-    argument and see how much it whines about having to pad your data structures
-    with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
-*** Consider Fringe Search
-    [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
-    growing and maintaining the open list.  Just about all of the points in this
-    document apply to Fringe Search, such as choosing a good heuristic, the
-    choice of diagonal vs. cardinal move costs, and using memoized heuristic
-    values.
+   If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
+   argument and see how much it whines about having to pad your data structures
+   with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
+** Consider Fringe Search
+   [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
+   growing and maintaining the open list.  Just about all of the points in this
+   document apply to Fringe Search, such as choosing a good heuristic, the
+   choice of diagonal vs. cardinal move costs, and using memoized heuristic
+   values.
 
-    With compiler optimizations on, I found Fringe Search to be slower than A*,
-    albeit only if the methods in this document are applied.  But with compiler
-    optimizations off, Fringe Search can be faster than A*.  It's reasonable to
-    /predict/ that Fringe Search might be the faster choice in interpreted
-    scripting languages...
+   With compiler optimizations on, I found Fringe Search to be slower than A*,
+   albeit only if the methods in this document are applied.  But with compiler
+   optimizations off, Fringe Search can be faster than A*.  It's reasonable to
+   /predict/ that Fringe Search might be the faster choice in interpreted
+   scripting languages...
 
-    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
+   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
 * Additional resources
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
