@@ -36,9 +36,9 @@
   - [[#use-octile-distance-on-an-8-connected-grid][Use octile distance on an 8-connected grid]]
   - [[#scale-your-heuristics-up][Scale your heuristics up]]
 - [[#implementation-details][Implementation details]]
-  - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
   - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
   - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
+  - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
   - [[#pack-your-data-structures][Pack your data structures]]
   - [[#consider-fringe-search][Consider Fringe Search]]
 - [[#additional-resources][Additional resources]]
@@ -100,6 +100,7 @@
         On average this keeps the size of the open list smaller, but it can
         also increase state expansions.  Usually it is noticeably faster.
 * Heuristics
+  I frequently see these details missed on many first implementations of A*.
 ** Use a non-overestimating heuristic
    Heuristics that don't overestimate are called /admissible/.  A* recovers an
    optimal (cheapest) path when its heuristic is admissible.  A good, admissible
@@ -141,24 +142,13 @@
 
    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
 * Implementation details
-** Know whether to use a heap
-   On larger grids with complex obstacles, implementing your open list as a
-   binary heap (preferably on top of an array) can lead to dramatic performance
-   gains.  This is why it's generally considered a best practice to do so.
-
-   But heaps can hurt you on smaller grids with few obstacles.  A linear scan
-   of the entire array can be much faster, especially if your implementation is
-   written in a low-level language like C++.
-
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
+  These details tend not to come up in textbook descriptions of A*.
 ** Break ties in favor of path depth
    It is common for more than one state on the open list to have the lowest ~f~
    cost.  When this is the case it's better to make A* focus on deep solutions
-   rather than a breadth of shallow solutions by tie-breaking in favor of
-   larger ~g~ values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video
-   that demonstrates this]].
+   rather than a breadth of shallow solutions by tie-breaking on larger ~g~
+   values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video that
+   demonstrates this]].
 
    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
 ** Avoid recomputing heuristics
@@ -177,6 +167,18 @@
    #+end_src
 
    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
+** Know whether to use a heap
+   On larger grids with complex obstacles, implementing your open list as a
+   binary heap (preferably on top of an array) can lead to dramatic performance
+   gains.  This is why it's generally considered a best practice to do so.
+
+   But heaps can hurt.  On smaller grids with few obstacles, a linear scan of
+   the entire open list can be much faster, especially if your implementation is
+   written in a low-level language like C++.
+
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
 ** Pack your data structures
    If you're coding in a low-level language like C, C++, or Rust, be aware of
    the effects of structure packing -- /especially/ if you're using an explicit
@@ -195,8 +197,8 @@
    With compiler optimizations on, I found Fringe Search to be slower than A*,
    albeit only if the methods in this document are applied.  But with compiler
    optimizations off, Fringe Search can be faster than A*.  It's reasonable to
-   /predict/ that Fringe Search might be the faster choice in interpreted
-   scripting languages...
+   /predict/ Fringe Search may be the faster choice in interpreted scripting
+   languages.
 
    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
 * Additional resources
