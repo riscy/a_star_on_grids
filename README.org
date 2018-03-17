@@ -14,7 +14,7 @@
 #+begin_latex
 \begin{comment}
 #+end_latex
-[[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180304-blue.svg]]
+[[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-201803xx-blue.svg]]
 #+ATTR_LATEX: :width 0.25\textwidth
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
@@ -35,12 +35,15 @@
   - [[#use-manhattan-distance-on-a-4-connected-grid][Use Manhattan distance on a 4-connected grid]]
   - [[#use-octile-distance-on-an-8-connected-grid][Use octile distance on an 8-connected grid]]
   - [[#scale-your-heuristics-up][Scale your heuristics up]]
-- [[#implementation-details][Implementation details]]
+- [[#algorithmic-details][Algorithmic details]]
   - [[#break-ties-in-favor-of-path-depth][Break ties in favor of path depth]]
   - [[#avoid-recomputing-heuristics][Avoid recomputing heuristics]]
   - [[#know-whether-to-use-a-heap][Know whether to use a heap]]
-  - [[#pack-your-data-structures][Pack your data structures]]
   - [[#consider-fringe-search][Consider Fringe Search]]
+- [[#implementation][Implementation]]
+  - [[#maintain-two-pathfinders][Maintain two pathfinders]]
+  - [[#choose-the-right-language][Choose the right language]]
+  - [[#pack-your-data-structures][Pack your data structures]]
 - [[#additional-resources][Additional resources]]
 - [[#contributing-and-citing][Contributing and citing]]
 
@@ -100,7 +103,8 @@
         On average this keeps the size of the open list smaller, but it can
         also increase state expansions.  Usually it is noticeably faster.
 * Heuristics
-  I frequently see these details missed on many first implementations of A*.
+  Here are some tips on selecting a good heuristic.  I frequently see these
+  details missed on many first implementations of A*.
 ** Use a non-overestimating heuristic
    Heuristics that don't overestimate are called /admissible/.  A* recovers an
    optimal (cheapest) path when its heuristic is admissible.  A good, admissible
@@ -136,13 +140,15 @@
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
 ** Scale your heuristics up
-   Multiply all heuristics by a constant ~K > 1~.  This simple change yields an
-   algorithm called Weighted A*, which significantly improves run-time -- at
-   the cost of small suboptimalities in your paths.
+   Once you've selected a good heuristic, try multiplying all of the values it
+   gives you by a constant ~K > 1~ (e.g. ~10~).  This simple change yields an
+   algorithm called Weighted A*, which significantly improves run-time at the
+   cost of small suboptimalities in your paths.
 
    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
-* Implementation details
-  These details tend not to come up in textbook descriptions of A*.
+* Algorithmic details
+  Some small details that tend not to come up in textbook descriptions
+  of A*.
 ** Break ties in favor of path depth
    It is common for more than one state on the open list to have the lowest ~f~
    cost.  When this is the case it's better to make A* focus on deep solutions
@@ -179,14 +185,6 @@
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
    - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
-** Pack your data structures
-   If you're coding in a low-level language like C, C++, or Rust, be aware of
-   the effects of structure packing -- /especially/ if you're using an explicit
-   graph to represent a large search space.
-
-   If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
-   argument and see how much it whines about having to pad your data structures
-   with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
 ** Consider Fringe Search
    [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
    growing and maintaining the open list.  Just about all of the points in this
@@ -201,6 +199,33 @@
    languages.
 
    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
+* Implementation
+  The following are some tips on the actual implementation of your pathfinder.
+** Maintain two pathfinders
+   During development you'll be constantly changing and refactoring your code.
+   This can be dangerous -- it is surprisingly easy to write a pathfinder that
+   seems to work but has an invisible bug that isn't obvious until much later.
+
+   To prevent this you should write tested code: write a simple but /correct/
+   pathinder and use it to test your production pathfinder.  For example, if
+   you're finding optimal paths, both your simple pathfinder and your optimized
+   pathfinder should return solutions of the same length, even if they visit
+   different states.
+** Choose the right language
+   You'll get huge speed gains by writing your pathfinder in a compiled
+   system-level language like C, or C++, or Rust.
+
+   If you're using a high-level scripting language, you're not necessarily out
+   of luck.  If you're using Python, for example, you could look into compiling
+   your pathfinding module with [[http://cython.readthedocs.io/en/latest/src/tutorial/cython_tutorial.html][Cython]] -- it's surprisingly easy to do.
+** Pack your data structures
+   If you're coding in a low-level language like C, C++, or Rust, be aware of
+   the effects of structure packing -- /especially/ if you're using an explicit
+   graph to represent a large search space.
+
+   If you're using ~gcc~, for example, try giving your compiler the ~-Wpadded~
+   argument and see how much it whines about having to pad your data structures
+   with extra bytes.  Eric Raymond has a [[http://www.catb.org/esr/structure-packing/][great writeup]] on this topic.
 * Additional resources
   - [[https://en.wikipedia.org/wiki/A*_search_algorithm][A* on Wikipedia]] :: Wikipedia gives a thorough description of A*.
   - [[http://movingai.com][Nathan Sturtevant's movingai.com]] :: Benchmark problems, tutorials, and
