@@ -1,8 +1,8 @@
 #+TITLE: Best practices for A* on grids (source code)
 
 * Table of Contents :TOC_1_gh:noexport:
- - [[#description][Description]]
- - [[#usage][Usage]]
+- [[#description][Description]]
+- [[#usage][Usage]]
 
 * Description
   Some simple pathfinding code, featuring the popular A*, LRTA*, and Fringe Search
@@ -12,7 +12,7 @@
   If you have ~g++~ installed, you should be able to compile and run a demo
   with:
   #+begin_src bash
-  make
+  make run
   #+end_src
   
   You should see some output resembling the following:
