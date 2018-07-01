@@ -55,7 +55,7 @@ void Graph::clear() {
 /// Load an ascii map.  Note this assumes the same file format as
 /// Nathan Sturtevant's Benchmarks for Grid-Based Pathfinding (2012).
 /// See: http://www.movingai.com/benchmarks/formats.html
-void Graph::load_ascii_map(string filename, EdgeType edge_type, bool corner_cut) {
+void Graph::load_ascii_map(string filename, EdgeType edge_type, bool corner_cut, bool verbose) {
   clear();
   ifstream map_file(filename.c_str(), ios::in);
   assert(map_file.good());
@@ -112,7 +112,9 @@ void Graph::load_ascii_map(string filename, EdgeType edge_type, bool corner_cut)
     edges = add_quartile_edges();
     this->cost = &man_cost;
   }
-  cout << filename << ": " << graph_view.size() << " nodes, " << edges << " edges" << endl;
+  if (verbose) {
+    cout << filename << ": " << graph_view.size() << " nodes, " << edges << " edges" << endl;
+  }
 }
 
 void Graph::load_empty_map(int dim1, int dim2, EdgeType edge_type) {

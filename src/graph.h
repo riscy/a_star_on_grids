@@ -50,7 +50,7 @@ class Graph {
   inline Node * node_at(int x, int y) { return grid_view[y * width + x]; }
   inline Node * random_node() { return graph_view[rand() % graph_view.size()]; }
 
-  void load_ascii_map(string filename, EdgeType edge_type = EDGES_DEFAULT, bool corner_cut = false);
+  void load_ascii_map(string filename, EdgeType edge_type = EDGES_DEFAULT, bool corner_cut = false, bool verbose = false);
   void load_empty_map(int dim1, int dim2, EdgeType edge_type = EDGES_DEFAULT);
 
   void display_ascii_map();

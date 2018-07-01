@@ -69,7 +69,7 @@ void benchmark_grid_costs() {
   size_t num_problems = 100000;
 
   Graph graph;
-  graph.load_ascii_map("../maps/example.map", EDGES_OCTILE);
+  graph.load_ascii_map("../maps/example.map", EDGES_OCTILE, true);
   benchmark_all_algorithms(graph, 100, &octile_heuristic); // warm the cache
 
   int test_costs[4][2] = {{70, 99}, {2, 3}, {50, 99}, {1, 1}};
