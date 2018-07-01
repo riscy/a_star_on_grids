@@ -1,0 +1,10 @@
+sudo: false
+
+language: cpp
+
+install:
+  - cd src
+  - make main
+
+script:
+  - make test
