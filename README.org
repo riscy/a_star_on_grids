@@ -1,6 +1,6 @@
 #+TITLE: Best practices for A* on grids
 #+OPTIONS: toc:nil author:t creator:nil num:nil
-#+AUTHOR: Chris Rayner
+#+AUTHOR: D. Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
 #+LATEX_HEADER: \usepackage[parfill]{parskip}
 #+LATEX_HEADER: \usepackage{comment}
@@ -81,6 +81,10 @@
    ~C = D = 1~).  While technically true, this increases the number of unique
    optimal paths across the grid; A* is more efficient when it has fewer
    options.
+
+   (Note if you're computing many paths at once via a shortest path tree, for
+   instance using Dijkstra's algorithm, then same-cost diagonal and cardinal
+   moves can be beneficial since you can just use a simple [[https://en.wikipedia.org/wiki/Breadth-first_search][BFS]].)
 ** Validate your move costs
    ~Ensure C < D < 2C~.  If a diagonal move costs /less/ than a cardinal move,
    A* prefers zigzagging paths.  If a diagonal move costs more than /two/
@@ -147,14 +151,12 @@
 
    See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
 * Algorithmic details
-  Some small details that tend not to come up in textbook descriptions
-  of A*.
+  Some details that tend not to come up in textbook descriptions of A*.
 ** Break ties in favor of path depth
    It is common for more than one state on the open list to have the lowest ~f~
    cost.  When this is the case it's better to make A* focus on deep solutions
    rather than a breadth of shallow solutions by tie-breaking on larger ~g~
-   values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video that
-   demonstrates this]].
+   values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video demonstration]].
 
    See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
 ** Avoid recomputing heuristics
@@ -242,10 +244,9 @@
 
   If for any reason you want to cite this document, use the following:
   #+begin_src bibtex
-  @TECHREPORT{Rayner2017BestPracticesGrids,
+  @manual{Rayner2017BestPracticesGrids,
       author = {D. Chris Rayner},
-      title = {Best practices for A\* on grids},
-      institution = {},
-      year = {2017}
+      title = {{Best practices for A\* on grids}},
+      year = 2018
   }
   #+end_src
