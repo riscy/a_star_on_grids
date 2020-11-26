@@ -14,7 +14,7 @@
 #+begin_export latex
 \begin{comment}
 #+end_export
-[[https://travis-ci.org/riscy/a_star_on_grids][https://travis-ci.org/riscy/a_star_on_grids.svg?branch=master]] [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180602-blue.svg]]
+[[https://github.com/riscy/a_star_on_grids/actions][https://github.com/riscy/a_star_on_grids/workflows/test/badge.svg]] [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180602-blue.svg]]
 
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
