@@ -14,7 +14,7 @@
 #+begin_export latex
 \begin{comment}
 #+end_export
-[[https://github.com/riscy/a_star_on_grids/actions][https://github.com/riscy/a_star_on_grids/workflows/test/badge.svg]] [[https://github.com/riscy/a_star_on_grids/raw/master/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180602-blue.svg]]
+[[https://github.com/riscy/a_star_on_grids/actions][https://github.com/riscy/a_star_on_grids/workflows/test/badge.svg]] [[https://github.com/riscy/a_star_on_grids/raw/main/pdf/a_star_on_grids.pdf][https://img.shields.io/badge/download-pdf-orange.svg]] [[https://img.shields.io/badge/version-20180602-blue.svg]]
 
 [[file:img/grid.png]]
 # http://www.veryicon.com/icons/system/icons8-metro-style/timeline-list-grid-grid.html
@@ -52,7 +52,7 @@
   pathfinding in four- and eight-connected grids.  It's pitched at hobbyists and
   anyone looking for ways to make existing code a bit faster.
 
-  Some accompanying [[https://github.com/riscy/a_star_on_grids/tree/master/src][example code]] is available in C++.
+  Some accompanying [[https://github.com/riscy/a_star_on_grids/tree/main/src][example code]] is available in C++.
 * Preliminaries
   Forgoing a complete description, recall that A* is essentially a loop that
   expands a list of /open/ states that reach toward a goal state.  Each
@@ -141,15 +141,15 @@
    # A proof for this relies on using a 45-degree rotation matrix to
    # turn what is effectively a norm in Linfty into a norm in L1 space.
 
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/heuristics.cpp#L59][example implementation of the octile heuristic]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/heuristics.cpp#L67][example implementation of the non-branching octile heuristic]]
 ** Scale your heuristics up
    Once you've selected a good heuristic, try multiplying all of the values it
    gives you by a constant ~K > 1~ (e.g. ~10~).  This simple change yields an
    algorithm called Weighted A*, which significantly improves run-time at the
    cost of small suboptimalities in your paths.
 
-   See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
+   See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/heuristics.cpp#L74][example implementation of a weighted octile heuristic]].
 * Algorithmic details
   Some details that tend not to come up in textbook descriptions of A*.
 ** Break ties in favor of path depth
@@ -158,7 +158,7 @@
    rather than a breadth of shallow solutions by tie-breaking on larger ~g~
    values.  My Ph.D. co-supervisor Nathan Sturtevant created [[http://movingai.com/astar.html][a video demonstration]].
 
-   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h#L9][example tiebreaking code]].
+   See [[https://github.com/riscy/a_star_on_grids/blob/main/src/node_heap.h#L9][example tiebreaking code]].
 ** Avoid recomputing heuristics
    To help keep the open list sorted, an implementation of A* might store the
    ~f_i~ and ~g_i~ values for every open state ~i~.  And since ~f_i = g_i +
@@ -174,7 +174,7 @@
    f_new = g_new + f_current - g_current
    #+end_src
 
-   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L119][an example of using memoized heuristics]].
+   See [[https://github.com/riscy/a_star_on_grids/blob/main/src/algorithms.cpp#L119][an example of using memoized heuristics]].
 ** Know whether to use a heap
    On larger grids with complex obstacles, implementing your open list as a
    binary heap (preferably on top of an array) can lead to dramatic performance
@@ -184,9 +184,9 @@
    the entire open list can be much faster, especially if your implementation is
    written in a low-level language like C++.
 
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L38][A* implementation that uses an array]]
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L90][A* implementation that uses a heap]]
-   - See an [[https://github.com/riscy/a_star_on_grids/blob/master/src/node_heap.h][example heap implementation]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/algorithms.cpp#L38][A* implementation that uses an array]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/algorithms.cpp#L90][A* implementation that uses a heap]]
+   - See an [[https://github.com/riscy/a_star_on_grids/blob/main/src/node_heap.h][example heap implementation]]
 ** Consider Fringe Search
    [[https://en.wikipedia.org/wiki/Fringe_search][Fringe Search]] is a close cousin of A* that takes a different approach to
    growing and maintaining the open list.  Just about all of the points in this
@@ -200,7 +200,7 @@
    /predict/ Fringe Search may be the faster choice in interpreted scripting
    languages.
 
-   See [[https://github.com/riscy/a_star_on_grids/blob/master/src/algorithms.cpp#L140][an example Fringe Search implementation]].
+   See [[https://github.com/riscy/a_star_on_grids/blob/main/src/algorithms.cpp#L140][an example Fringe Search implementation]].
 * Implementation
   The following are some tips on the actual implementation of your pathfinder.
 ** Maintain two pathfinders
